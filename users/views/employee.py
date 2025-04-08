@@ -1,7 +1,10 @@
 from asgiref.sync import sync_to_async
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from adrf.views import APIView
 from adrf.viewsets import ModelViewSet
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from users.models.employee import Employee
 from rest_framework import status
 from users.serializers.employee import EmployeeSerializer
@@ -9,6 +12,8 @@ from users.serializers.employee import EmployeeSerializer
 class EmployeeViewSet(ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     async def retrieve(self, request, pk):
         try:
             book = await sync_to_async(Employee.objects.filter(id=pk).first, thread_sensitive=True)()
@@ -16,8 +21,7 @@ class EmployeeViewSet(ModelViewSet):
             return Response(serializer.data)
         except Employee.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-    async def list(self, request):
+    async def list(self, request, *args, **kwargs):
         try:
             books = await sync_to_async(Employee.objects.all)()
             serializer = EmployeeSerializer(books, many=True)

@@ -1,4 +1,7 @@
 from asgiref.sync import sync_to_async
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from adrf.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -7,9 +10,12 @@ from users.models import Employee
 import hashlib
 
 from users.serializers.employee import EmployeeSerializer
+from users.services.auth_service import AuthService
 
 
 @api_view(['POST'])
+@authentication_classes([BasicAuthentication])  # Disable default authentication
+@permission_classes([AllowAny])
 async def sign_in(request, *args, **kwargs):
     username = request.data.get('username')
     password = request.data.get('password')
@@ -30,19 +36,15 @@ def get_token_for_user(user):
         'access': str(refresh.access_token),
     }
 @api_view(['POST'])
-async def sign_up(request, *args, **kwargs):
-    username = request.data.get('username')
-    password = request.data.get('password')
-    email = request.data.get('email')
-
-    if not username or not password or not email:
-        return Response({"status": "error", "message": "Username, password and email are required"}, status=400)
-    if await sync_to_async(Employee.objects.filter(username=username).exists)():
-        return Response({"status": "error", "message": "Username already exists"}, status=400)
+@authentication_classes([BasicAuthentication])
+@permission_classes([AllowAny])
+async def sign_up(request):
     try:
-        hashing = hashlib.sha256(password.encode())
-        hashing = hashing.hexdigest()
-        employee = await sync_to_async(Employee.objects.create)(username=username, hashed_password=hashing, email=email)
-        return Response({"status": "success", "message": "User created successfully"}, status=201)
+        sv = AuthService()
+        rq = sv.sign_up(request)
+        if rq:
+            return Response({"status": "success", "message": "User created successfully", "data": rq}, status=201)
+        else:
+            return Response({"status": "error", "data":rq}, status=400)
     except Exception as e:
-        return Response({"status": "error", "message": str(e)}, status=400)
+        return Response({"status": "error", "message": e}, status=400)
