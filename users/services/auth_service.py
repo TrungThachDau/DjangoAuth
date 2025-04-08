@@ -3,7 +3,8 @@ from users.serializers.employee import EmployeeSerializer
 
 
 class AuthService:
-    def sign_up(self, request):
+    @staticmethod
+    def sign_up(self,request):
         data ={
             'name': request.data.get('name'),
             'username': request.data.get('username'),
@@ -17,3 +18,5 @@ class AuthService:
                 return serializer.data
         else:
             raise ValueError(serializer.errors)
+    def sign_in(self, request):
+        pass
