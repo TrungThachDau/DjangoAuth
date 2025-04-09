@@ -12,7 +12,7 @@ class Employee(models.Model):
     is_anonymous = models.BooleanField(default=False)
     is_authenticated = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-
+    is_changed_password = models.BooleanField(default=False)
     REQUIRED_FIELDS = ['email']
     USERNAME_FIELD =  'username'
 

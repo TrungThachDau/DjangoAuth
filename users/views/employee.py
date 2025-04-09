@@ -14,7 +14,7 @@ class EmployeeViewSet(ModelViewSet):
     serializer_class = EmployeeSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    async def retrieve(self, request, pk):
+    async def retrieve(self, request, pk,*args, **kwargs):
         try:
             book = await sync_to_async(Employee.objects.filter(id=pk).first, thread_sensitive=True)()
             serializer = EmployeeSerializer(book)
@@ -29,7 +29,7 @@ class EmployeeViewSet(ModelViewSet):
         except Exception as e:
             return Response({'error': str(e)}, status=500)
 
-    async def create(self, request, *args, **kwargs):
+    async def create(self, request, **kwargs):
         try:
             book_list = request.data
             created_books = []
@@ -57,7 +57,7 @@ class EmployeeViewSet(ModelViewSet):
         except Exception as e:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    async def destroy(self, request, pk):
+    async def destroy(self, request, pk, **kwargs):
         try:
             book = await sync_to_async(Employee.objects.filter(id=pk).first, thread_sensitive=True)()
             if book is not None:

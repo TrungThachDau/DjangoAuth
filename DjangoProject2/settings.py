@@ -109,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
+APPEND_SLASH=False
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -155,3 +155,19 @@ SIMPLE_JWT = {
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "quangtrung.nguyen.2016@gmail.com"
+EMAIL_HOST_PASSWORD = "wziv zjzg tiub pagk"
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Máy chủ SMTP của Gmail
+EMAIL_PORT = 587  # Cổng SMTP (TLS)
+EMAIL_USE_TLS = True  # Sử dụng TLS
+EMAIL_HOST_USER = 'quangtrung.nguyen.2016@gmail.com'  # Email của bạn
+EMAIL_HOST_PASSWORD = 'wziv zjzg tiub pagk'  # Mật khẩu ứng dụng (hoặc mật khẩu email nếu không dùng 2FA)
+DEFAULT_FROM_EMAIL = 'quangtrung.nguyen.2016@gmail.com'  # Email mặc đ
