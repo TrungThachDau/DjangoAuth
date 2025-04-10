@@ -32,11 +32,11 @@ async def sign_up(request):
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
-async def forgot_password(request):
+async def reset_password(request):
     try:
         auth_service = AuthService()
-        new_user = await sync_to_async(auth_service.forget_password)(request.data)
-        return Response({"status": "success", "message": "successfully"}, status=status.HTTP_201_CREATED)
+        new_user = await sync_to_async(auth_service.reset_password)(request.data)
+        return Response({"status": "success", "message": "User created successfully","data":new_user.serializer.data}, status=status.HTTP_201_CREATED)
     except ValueError as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['POST'])
@@ -45,7 +45,17 @@ async def forgot_password(request):
 async def confirm_new_password(request,token):
     try:
         auth_service = AuthService()
-        await sync_to_async(auth_service.confirm_new_password)(request.data,token)
-        return Response({"status": "success", "message": "User update successfully"}, status=status.HTTP_201_CREATED)
+        new_user = await sync_to_async(auth_service.confirm_new_password)(request.data,token)
+        return Response({"status": "success", "message": "User update successfully","data":new_user.serializer.data}, status=status.HTTP_201_CREATED)
+    except ValueError as e:
+        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([AllowAny])
+async def change_password(request):
+    try:
+        auth_service = AuthService()
+        new_user = await sync_to_async(auth_service.change_password)(request.data)
+        return Response({"status": "success", "message": "User created successfully","data":new_user.serializer.data}, status=status.HTTP_201_CREATED)
     except ValueError as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

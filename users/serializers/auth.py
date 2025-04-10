@@ -11,7 +11,6 @@ class SignUpSerializer(ModelSerializer):
         extra_kwargs = {
             'hashed_password': {'write_only': True},
             'email': {'required': True},
-            'username': {'min_length': 10, },
             'name': {'required': True},
         }
     def create(self, validated_data):

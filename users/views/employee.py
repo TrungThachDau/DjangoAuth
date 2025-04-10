@@ -9,9 +9,7 @@ from users.models.employee import Employee
 from rest_framework import status
 from users.serializers.employee import EmployeeSerializer
 
-class EmployeeViewSet(ModelViewSet):
-    queryset = Employee.objects.all()
-    serializer_class = EmployeeSerializer
+class EmployeeView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     async def retrieve(self, request, pk,*args, **kwargs):

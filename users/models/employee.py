@@ -13,6 +13,8 @@ class Employee(models.Model):
     is_authenticated = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_changed_password = models.BooleanField(default=False)
+    is_admin_user = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
     REQUIRED_FIELDS = ['email']
     USERNAME_FIELD =  'username'
 

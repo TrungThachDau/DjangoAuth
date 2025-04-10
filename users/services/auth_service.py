@@ -57,7 +57,7 @@ class AuthService:
         else:
             raise ValueError("Invalid credentials")
 
-    def forget_password(self,request_data):
+    def reset_password(self,request_data):
         username = request_data.get('username')
         user = Employee.objects.filter(username=username).first()
         if user:
@@ -99,15 +99,5 @@ class AuthService:
             return {"message": "Password changed successfully"}
         else:
             raise ValueError("Invalid credentials")
-
-    # def send_email(self,*args):
-    #
-    #     send_mail(
-    #         "Subject here",
-    #         "Here is the message.",
-    #         "quangtrung.nguyen.2016@gmail.com",
-    #         ["qtrung1702@outlook.com"],
-    #         fail_silently=False,
-    #     )
 
 

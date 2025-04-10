@@ -1,7 +1,7 @@
-from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
-from users.models.permission import Permission
+
 from users.models.employee_role import EmployeeRole
+from users.models.permission import Permission
 
 
 class RolePermission(models.Model):
