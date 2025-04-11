@@ -14,7 +14,6 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 urlpatterns = [
-    # path('books/', views.books, name='books'),
     path('users/', include('rest_framework.urls', namespace='rest_framework')),
 
     path('auth/signin/', sign_in, name='signin'),
@@ -28,5 +27,8 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('customer/', views.customer.CustomerView.as_view()),
-    path('employee/', views.employee.EmployeeView.as_view())
+    path('employee/', views.employee.EmployeeView.as_view()),
+    path('customer/<int:pk>/', views.customer.CustomerDetailView.as_view()),
+
+    path('employee_role/', views.employee_role.EmployeeRoleView.as_view()),
     ]

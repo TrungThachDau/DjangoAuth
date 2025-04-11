@@ -16,7 +16,8 @@ async def sign_in(request):
     try:
         auth_service = AuthService()
         token = await sync_to_async(auth_service.sign_in)(request.data)
-        return Response({"status": "success", "message": "Login successful", "data": token}, status=status.HTTP_200_OK)
+        user = await sync_to_async(auth_service.get_user)(request.data)
+        return Response({"status": "success", "message": "Login successful", "data": token, "user":user}, status=status.HTTP_200_OK)
     except ValueError as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['POST'])

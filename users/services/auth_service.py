@@ -12,6 +12,21 @@ class AuthService:
             'refreshToken': str(refresh),
             'accessToken': str(refresh.access_token),
         }
+    def get_user(self, request_data):
+        username = request_data.get('username')
+        if not username:
+            raise ValueError("Username is required")
+        user = Employee.objects.filter(username=username).first()
+        if user:
+            return {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'is_changed_password': user.is_changed_password,
+                'role': user.role.id,
+            }
+        else:
+            raise ValueError("User not found")
     def sign_up(self, request_data):
         serializer = SignUpSerializer(data=request_data)
         if serializer.is_valid():

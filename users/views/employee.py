@@ -1,5 +1,5 @@
 from asgiref.sync import sync_to_async
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from adrf.views import APIView
 from adrf.viewsets import ModelViewSet
