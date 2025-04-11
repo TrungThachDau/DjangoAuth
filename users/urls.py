@@ -5,8 +5,9 @@ from . import views
 from rest_framework import routers
 
 from .views.auth import *
-from .views.customer import CustomerView
+from .views.customer import CustomerView, CustomerDetailView
 from .views.employee import EmployeeView
+from .views.employee_role import EmployeeRoleView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -26,9 +27,9 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    path('customer/', views.customer.CustomerView.as_view()),
-    path('employee/', views.employee.EmployeeView.as_view()),
-    path('customer/<int:pk>/', views.customer.CustomerDetailView.as_view()),
+    path('customer/', CustomerView.as_view()),
+    path('employee/', EmployeeView.as_view()),
+    path('customer/<int:pk>/', CustomerDetailView.as_view()),
 
-    path('employee_role/', views.employee_role.EmployeeRoleView.as_view()),
+    path('employee_role/', EmployeeRoleView.as_view()),
     ]

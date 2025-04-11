@@ -19,4 +19,4 @@ EXPOSE 8000
 # Command to run the application
 #CMD ["python", "manage.py", "runserver", "0.0.0.0:8000","--noreload"]
 #CMD ["python","-m","uvicorn","Django1.asgi:application", "--host","0.0.0.0","--port","8001","--reload"]
-CMD ["uvicorn","Django1.asgi:application", "--host","0.0.0.0","--port","8000","--reload"]
+CMD ["uvicorn","DjangoProject2.asgi:application", "--host","0.0.0.0","--port","8000","--reload"]
