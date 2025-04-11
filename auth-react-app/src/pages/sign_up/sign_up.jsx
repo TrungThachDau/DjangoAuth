@@ -22,11 +22,14 @@ const SignUp = () => {
     return (
         <div className='signin-container'>
             <div className='signin-content'>
-                <div className='signin-logo'>
-                    <img src='./src/assets/logo.png' alt='Messenger Logo' />
-                </div>
-                <h2>Register</h2>
+                <h2>Sign up</h2>
                 <Form onFinish={onSubmitLogin}>
+                    <Form.Item name="email">
+                        <Input className='signin-input' placeholder='Email' />
+                    </Form.Item>
+                    <Form.Item name="username">
+                        <Input className='signin-input' placeholder='Username' />
+                    </Form.Item>
                     <Form.Item name="name">
                         <Input className='signin-input' placeholder='Name' />
                     </Form.Item>
@@ -39,6 +42,7 @@ const SignUp = () => {
                     <Form.Item name="retypePassword">
                         <Input.Password className='signin-input' placeholder='Retype Password' />
                     </Form.Item>
+
                     {contextHolder}
                     <Button  className='signin-button' htmlType="submit">Sign Up</Button>
                     <Link to="/sign-in" className='forgot-password'>Back to Sign In</Link>

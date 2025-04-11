@@ -14,7 +14,7 @@ class EmployeeRoleView(APIView):
     async def get(self, request):
         try:
             role_sv = EmployeeRoleService()
-            response = await  sync_to_async(role_sv.get_role_list())(request)
+            response = await  sync_to_async(role_sv.get_role_list)(request)
             return Response(response, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -22,7 +22,7 @@ class EmployeeRoleView(APIView):
     async def post(self, request):
         try:
             role_sv = EmployeeRoleService()
-            response = await sync_to_async(role_sv.create_new_role())(request)
+            response = await sync_to_async(role_sv.create_new_role)(request)
             return Response(response, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -38,7 +38,7 @@ class EmployeeRoleView(APIView):
     async def delete(self, request, pk):
         try:
             role_sv = EmployeeRoleService()
-            response = await sync_to_async(role_sv.delete_customer)(request, pk)
+            response = await sync_to_async(role_sv.delete_role)(request, pk)
             return Response(response, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

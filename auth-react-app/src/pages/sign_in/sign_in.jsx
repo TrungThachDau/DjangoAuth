@@ -2,6 +2,7 @@ import './sign_in.css';
 import { Button, Input, Form, message} from 'antd';
 import {Link, useNavigate} from "react-router-dom";
 import axiosInstance from '/src/axios.js';
+import NavBar from "../../components/nav_bar/nav_bar.jsx";
 const SignIn = () => {
 
     const [messageApi, contextHolder] = message.useMessage();
@@ -32,7 +33,9 @@ const SignIn = () => {
     }
 
     return (
-        <div className='signin-container'>
+        <>
+            <NavBar></NavBar>
+            <div className='signin-container'>
             <div className='signin-content'>
                 {/*<div className='signin-logo'>*/}
                 {/*    <img src='./src/assets/logo.png' alt='Messenger Logo' />*/}
@@ -53,6 +56,8 @@ const SignIn = () => {
                 </Form>
             </div>
         </div>
+        </>
+
     );
 }
 

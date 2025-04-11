@@ -21,7 +21,7 @@ class EmployeeRoleService:
         else:
             raise ValueError(serializer.errors)
     def update_role(self,request,role_id):
-        employee_role = Customer.objects.filter(id=role_id).first()
+        employee_role = EmployeeRole.objects.filter(id=role_id).first()
         if employee_role:
             serializer = EmployeeRoleSerializer(employee_role, data=request.data)
             if serializer.is_valid():
@@ -31,15 +31,15 @@ class EmployeeRoleService:
                 raise ValueError(serializer.errors)
         else:
             raise ValueError("Customer not found")
-    def delete_customer(self,request,role_id):
-        employee_role = Customer.objects.filter(id=role_id).first()
+    def delete_role(self,request,role_id):
+        employee_role = EmployeeRole.objects.filter(id=role_id).first()
         if employee_role:
             employee_role.delete()
-            return {"message": "Customer deleted successfully"}
+            return {"message": "Role deleted successfully"}
         else:
             raise ValueError("Customer not found")
-    def get_customer_detail(self,request,role_id):
-        employee_role = Customer.objects.filter(id=role_id).first()
+    def get_role_detail(self,request,role_id):
+        employee_role = EmployeeRole.objects.filter(id=role_id).first()
         if employee_role:
             serializer = EmployeeRoleSerializer(employee_role)
             return serializer.data
