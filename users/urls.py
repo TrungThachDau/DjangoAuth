@@ -1,9 +1,5 @@
 
 from django.urls import path,include
-
-from . import views
-from rest_framework import routers
-
 from .views.auth import *
 from .views.customer import CustomerView, CustomerDetailView
 from .views.employee import EmployeeView
@@ -12,7 +8,7 @@ from .views.employee_role import EmployeeRoleView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
-    TokenVerifyView,
+    TokenVerifyView, TokenBlacklistView,
 )
 urlpatterns = [
     path('users/', include('rest_framework.urls', namespace='rest_framework')),
@@ -32,4 +28,5 @@ urlpatterns = [
     path('customer/<int:pk>/', CustomerDetailView.as_view()),
 
     path('employee_role/', EmployeeRoleView.as_view()),
+    path('api/token/blacklist/', TokenBlacklistView.as_view(), name='token_blacklist'),
     ]

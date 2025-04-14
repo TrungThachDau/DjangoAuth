@@ -68,7 +68,13 @@ class AuthService:
             user.is_changed_password = True
             user.save()
 
-            return {"message": "Password changed successfully"}
+            return {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'is_changed_password': user.is_changed_password,
+                'role': user.role.id,
+            }
         else:
             raise ValueError("Invalid credentials")
 
@@ -79,11 +85,12 @@ class AuthService:
             token = self.get_token_for_user(user)
             send_mail(
                 "Reset Password",
-                "https://localhost:8000/api/confirm-new-password/" + str(token['accessToken']),
+                "https://master.d1xxb9w4wrs7q.amplifyapp.com/confirm-password?token=" + str(token['refreshToken'])+'&username=' + str(username),
                 "quangtrung.nguyen.2016@gmail.com",
                 [user.email],
                 fail_silently=False,
             )
+            return token
         else:
             raise ValueError("Invalid credentials")
 
@@ -93,7 +100,6 @@ class AuthService:
 
         if not username or not new_password:
             raise ValueError("Username and new password are required")
-
         try:
             UntypedToken(token)
         except TokenError as e:
@@ -104,13 +110,11 @@ class AuthService:
             user.hashed_password = make_password(new_password)
             user.is_changed_password = True
             user.save()
-
             try:
                 refresh = RefreshToken(token)
                 refresh.blacklist()
-            except TokenError:
-                pass
-
+            except TokenError as e:
+                raise ValueError(f"Invalid token: {e}")
             return {"message": "Password changed successfully"}
         else:
             raise ValueError("Invalid credentials")

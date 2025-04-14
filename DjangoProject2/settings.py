@@ -29,8 +29,7 @@ SECRET_KEY = 'django-insecure-oackllfw##1c!#hhtg3b8=f_$8rq+oe*#$f=#1qfa-bb@qhn*+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*'
-                 ]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -45,7 +44,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'users',
     'rest_framework_simplejwt',
-    'corsheaders'
+    'corsheaders',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
@@ -151,7 +151,6 @@ REST_FRAMEWORK = {
     )
 
 }
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -163,9 +162,9 @@ SIMPLE_JWT = {
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # Máy chủ SMTP của Gmail
-EMAIL_PORT = 587  # Cổng SMTP (TLS)
-EMAIL_USE_TLS = True  # Sử dụng TLS
-EMAIL_HOST_USER = 'quangtrung.nguyen.2016@gmail.com'  # Email của bạn
-EMAIL_HOST_PASSWORD = 'wziv zjzg tiub pagk'  # Mật khẩu ứng dụng (hoặc mật khẩu email nếu không dùng 2FA)
-DEFAULT_FROM_EMAIL = 'quangtrung.nguyen.2016@gmail.com'  # Email mặc đ
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'quangtrung.nguyen.2016@gmail.com'
+EMAIL_HOST_PASSWORD = 'wziv zjzg tiub pagk'
+DEFAULT_FROM_EMAIL = 'quangtrung.nguyen.2016@gmail.com'
