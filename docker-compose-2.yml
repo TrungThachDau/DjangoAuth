@@ -1,0 +1,33 @@
+services:
+  backend:
+    image: 990640380179.dkr.ecr.ap-southeast-1.amazonaws.com/android17x/python_django_auth:latest
+
+
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    networks:
+      - default
+  frontend:
+    image: 990640380179.dkr.ecr.ap-southeast-1.amazonaws.com/android17x/react-app:latest
+#    environment:
+#      - PORT=5173
+    volumes:
+      - .:/fe/app
+      - /fe/app/node_modules
+    networks:
+      - default
+    ports:
+      - "5173:5173"
+  nginx:
+    image: 990640380179.dkr.ecr.ap-southeast-1.amazonaws.com/android17x/nginx:latest
+    ports:
+      - "80:80"
+    networks:
+      - default
+networks:
+    default:
+        driver: bridge

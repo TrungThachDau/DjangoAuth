@@ -1,13 +1,17 @@
 
 import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
-import SignIn from './pages/sign_in/sign_in';
-import SignUp from './pages/sign_up/sign_up';
+import SignIn from './pages/authentication/sign_in/sign_in';
+import SignUp from './pages/authentication/sign_up/sign_up';
 import './App.css'
 import '@ant-design/v5-patch-for-react-19';
 import Customer from "./pages/customer/customer.jsx";
-import ResetPassword from "./pages/reset_password/reset_password.jsx";
-import ConfirmPassword from "./pages/confirm-password/confirm_password.jsx";
-
+import ResetPassword from "./pages/authentication/reset_password/reset_password.jsx";
+import ConfirmPassword from "./pages/authentication/confirm-password/confirm_password.jsx";
+import SignOut from "./pages/authentication/sign_out/sign_out.jsx";
+import NotFound from "./pages/not_found/not_found.jsx";
+import ChangePassword from "./pages/authentication/change_password/change_password.jsx";
+import Detail from "./pages/customer/detail/detail.jsx";
+import AddCustomer from "./pages/customer/add/add.jsx";
 function App() {
 
   return (
@@ -20,6 +24,11 @@ function App() {
             <Route path="/customer" element={<Customer />}></Route>
             <Route path="/reset-password" element={<ResetPassword />}></Route>
             <Route path="/confirm-password" element={<ConfirmPassword />}></Route>
+            <Route path="/sign-out" element={<SignOut />}></Route>
+            <Route path="/change-password" element={<ChangePassword />}></Route>
+            <Route path="/customer/add" element={<AddCustomer />}></Route>
+            <Route path="/customer/:customerId" element={<Detail />}></Route>
+            <Route path="*" element={<NotFound />} />
       </Routes>
      </BrowserRouter>
     </>

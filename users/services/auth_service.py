@@ -3,6 +3,7 @@ from rest_framework_simplejwt.tokens import RefreshToken, UntypedToken
 from rest_framework_simplejwt.exceptions import TokenError
 from users.models import Employee
 from users.serializers.auth import SignUpSerializer
+from rest_framework_simplejwt.tokens import api_settings
 from django.core.mail import send_mail
 
 class AuthService:
@@ -54,6 +55,14 @@ class AuthService:
             return token
         else:
             raise ValueError("Invalid credentials")
+    def sign_out(self, request):
+        token = request.get('refreshToken')
+        if not token:
+            raise ValueError("Token is required")
+        refresh = RefreshToken(token)
+        refresh.blacklist()
+        return {"message": "Ok"}
+
     def change_password(self, request_data):
         username = request_data.get('username')
         old_password = request_data.get('old_password')

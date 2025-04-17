@@ -12,13 +12,15 @@ services:
   frontend:
     build:
       context: /auth-react-app
-    ports:
-      - "5173:5173"
+    environment:
+      - PORT=5173
     volumes:
       - .:/fe/app
       - /fe/app/node_modules
     networks:
       - default
+    ports:
+      - "5173:5173"
   frontend2:
     build:
       context: /auth-react-app-2

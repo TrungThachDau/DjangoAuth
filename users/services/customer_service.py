@@ -48,9 +48,9 @@ class CustomerService:
             raise ValueError("Customer not found")
     def get_customer_detail(self,request,customer_id):
         customer = Customer.objects.filter(id=customer_id).first()
-        user = request.user
-        if user.id!= customer.employee:
-            raise ValueError("You are not authorized to view this customer")
+        # user = request.user
+        # if user.id!= customer.employee:
+        #     raise ValueError("You are not authorized to view this customer")
         if customer:
             serializer = CustomerSerializer(customer)
             return serializer.data

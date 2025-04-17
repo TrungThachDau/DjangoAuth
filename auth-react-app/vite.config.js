@@ -1,13 +1,13 @@
-import { defineConfig } from 'vite'
+import { defineConfig,  } from 'vite'
 import viteReact from "@vitejs/plugin-react";
-
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [viteReact()],
-  server:{
-    host:true,
-    port:5173,
-    allowedHosts:true
-  },
-
-})
+export default defineConfig(() => {
+  return {
+    plugins: [viteReact()],
+    server: {
+      host: true,
+      // eslint-disable-next-line no-process-env
+      port: 5173,
+      allowedHosts: true,
+    },
+  };
+});
