@@ -1,23 +1,54 @@
 import React, { useEffect, useState } from "react";
 import NavBar from "../../components/nav_bar/nav_bar.jsx";
-import { Row, Space, Table, Tag } from "antd";
+import { Button, Modal, Space, Table, message } from "antd";
 import axiosInstance from "../../axios.js";
+import { Link } from "react-router-dom";
 
 const Customer = () => {
   const [data, setData] = useState([]);
+  const [customerId, setCustomerId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const showModal = (id) => {
+    setCustomerId(id);
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    deleteCustomer(customerId);
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const deleteCustomer = (id) => {
+    axiosInstance
+      .delete(`customer/${id}/`, {
+        headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
+      })
+      .then(() => {
+        messageApi.success("Customer deleted successfully").then(r => (console.log(r)));
+        setData(data.filter((item) => item.id !== id));
+      })
+      .catch((error) => {
+        messageApi.error(error.response?.data?.message || "An error occurred");
+      });
+  };
 
   const columns = [
     {
       title: "Id",
-      dataIndex:"id",
+      dataIndex: "id",
       key: "id",
-
     },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      render: (text) => <a>{text}</a>,
+      render: (text, record) => <Link to={`/customer/${record.id}`}>{text}</Link>,
     },
     {
       title: "Phone",
@@ -30,19 +61,21 @@ const Customer = () => {
       key: "address",
     },
     {
-    title: "Date",
-    key: "date",
-    dataIndex: "date",
+      title: "Date",
+      key: "date",
+      dataIndex: "date",
     },
-
     {
       title: "Action",
       key: "action",
       render: (_, record) => (
         <Space size="middle">
-          <a>Detail</a>
-          <a>Delete</a>
-          <a>Edit</a>
+          <Button type="primary" onClick={() => showModal(record.id)}>
+            Delete
+          </Button>
+          <Button type="primary">
+            <Link to={`/customer/update/${record.id}`}>Edit</Link>
+          </Button>
         </Space>
       ),
     },
@@ -50,24 +83,12 @@ const Customer = () => {
 
   useEffect(() => {
     axiosInstance
-      .get("customer/",{
-        headers: {Authorization: "Bearer " + sessionStorage.getItem("accessToken")}
+      .get("customer/", {
+        headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
       })
       .then((response) => {
-        if(response.status===401){
-            console.log("refresh token");
-            axiosInstance.post('token/refresh/',{
-                refresh: sessionStorage.getItem("refreshToken")
-            }).then((response) => {
-                sessionStorage.setItem("accessToken", response.data.access);
-                console.log("new access token: ",response.data.access);
-            }).catch((error) => {
-                console.error("Error refreshing token:", error);
-            }
-            );
-        }
-        // Update the table data
         setData(response.data);
+        localStorage.setItem("customerData", JSON.stringify(response.data));
       })
       .catch((error) => {
         console.error("Error fetching customer data:", error);
@@ -78,8 +99,17 @@ const Customer = () => {
     <div>
       <NavBar />
       <div style={{ padding: "30px" }}>
+        <Link to="/customer/add">
+          <Button type="primary" style={{ marginBottom: "20px" }}>
+            Add Customer
+          </Button>
+        </Link>
         <Table dataSource={data} columns={columns} rowKey="id" />
       </div>
+      <Modal title="Delete" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <p>Are you sure you want to delete this customer?</p>
+      </Modal>
+      {contextHolder}
     </div>
   );
 };

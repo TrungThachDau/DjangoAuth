@@ -15,5 +15,3 @@ class Customer(models.Model):
     date = models.DateField()
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE,blank=True, null=True)
 
-    def __str__(self):
-        return self.name

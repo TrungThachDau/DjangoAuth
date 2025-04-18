@@ -26,7 +26,6 @@ urlpatterns = [
     path('customer/', CustomerView.as_view()),
     path('employee/', EmployeeView.as_view()),
     path('customer/<int:pk>/', CustomerDetailView.as_view()),
-
     path('employee_role/', EmployeeRoleView.as_view()),
     path('api/token/blacklist/', TokenBlacklistView.as_view(), name='token_blacklist'),
     path('auth/sign-out/',sign_out, name='sign_out'),

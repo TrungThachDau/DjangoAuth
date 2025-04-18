@@ -12,6 +12,7 @@ import NotFound from "./pages/not_found/not_found.jsx";
 import ChangePassword from "./pages/authentication/change_password/change_password.jsx";
 import Detail from "./pages/customer/detail/detail.jsx";
 import AddCustomer from "./pages/customer/add/add.jsx";
+import UpdateCustomer from "./pages/customer/update/update.jsx";
 function App() {
 
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/change-password" element={<ChangePassword />}></Route>
             <Route path="/customer/add" element={<AddCustomer />}></Route>
             <Route path="/customer/:customerId" element={<Detail />}></Route>
+            <Route path="/customer/update/:customerId" element={<UpdateCustomer />}></Route>
             <Route path="*" element={<NotFound />} />
       </Routes>
      </BrowserRouter>

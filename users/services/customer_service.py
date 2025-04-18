@@ -24,10 +24,8 @@ class CustomerService:
     def update_customer(self,request,customer_id):
         customer = Customer.objects.filter(id=customer_id).first()
         user = request.user
-        if user.id!= customer.employee:
-            raise ValueError("You are not authorized to update this customer")
         if customer:
-            customer.employee = user.id
+            customer.employee = user
             serializer = CustomerSerializer(customer, data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -39,8 +37,6 @@ class CustomerService:
     def delete_customer(self,request,customer_id):
         customer = Customer.objects.filter(id=customer_id).first()
         user = request.user
-        if user.id!= customer.employee:
-            raise ValueError("You are not authorized to delete this customer")
         if customer:
             customer.delete()
             return {"message": "Customer deleted successfully"}
