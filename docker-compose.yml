@@ -1,32 +1,22 @@
-version: "3.8"
-
 services:
   backend:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
-    env_file:
-      - .env
+      - .:/app
     networks:
       - default
-
   frontend:
     build:
       context: ./auth-react-app
-    environment:
-      - PORT=5173
-    volumes:
-      - ./auth-react-app:/fe/app
-      - /fe/app/node_modules
+      dockerfile: Dockerfile
     networks:
       - default
     ports:
       - "5173:5173"
-    depends_on:
-      - backend
-
   nginx:
     build:
       context: ./nginx
@@ -35,10 +25,6 @@ services:
       - "80:80"
     networks:
       - default
-    depends_on:
-      - frontend
-      - backend
-
 networks:
   default:
     driver: bridge
