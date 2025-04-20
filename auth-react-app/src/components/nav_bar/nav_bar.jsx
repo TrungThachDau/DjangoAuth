@@ -1,37 +1,16 @@
 import { Link } from "react-router-dom";
-import './nav_bar.css';
-import { useEffect, useState } from "react";
-import MyDrop from "../drop_down/drop_down.jsx";
+// import './nav_bar.css'; // Optional: Add styles for the navbar
 
-const NavBar = (props) => {
-    const [isLogin, setIsLogin] = useState(false);
-    const user = sessionStorage.getItem("username");
-
-    useEffect(() => {
-        if (sessionStorage.getItem('username')) {
-            setIsLogin(true);
-        } else {
-            setIsLogin(false);
-        }
-    }, []);
-
+const NavBar = () => {
     return (
-        <nav className="navbar-custom">
+        <nav className="navbar">
             <div className="navbar-brand">
-                <Link to="/" className="nav-link">Home</Link>
-                <Link to="/customer" className="nav-link">Customer</Link>
-                <Link to="/role" className="nav-link">Role</Link>
-                <Link to="/employee" className="nav-link">Employee</Link>
+                <Link to="/">Home</Link>
             </div>
             <div className="navbar-menu">
-                {isLogin ? (
-                    <MyDrop status={"Hi, " + user}
-
-                    />
-                    // <Link to="/sign-out" className="nav-link">Hi, {user}, Sign out</Link>
-                ) : (
-                    <Link to="/sign-in" className="nav-link">Sign in</Link>
-                )}
+                <Link to="/customer">Customer</Link>
+                <Link to="/employee">Employee</Link>
+                <Link to="/role">Role</Link>
             </div>
         </nav>
     );
