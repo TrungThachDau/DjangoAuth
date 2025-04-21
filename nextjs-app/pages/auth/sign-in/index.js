@@ -4,7 +4,7 @@ import Link from "next/link";
 import axiosInstance from "../../../axios.js";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-
+import { signIn } from "@/services/authentication.js";
 export default function SignIn() {
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
@@ -24,27 +24,20 @@ export default function SignIn() {
     }
 
     setLoading(true);
-    axiosInstance
-      .post("/auth/signin/", { username, password })
-      .then((response) => {
-        const { user, data } = response.data;
-
-        sessionStorage.setItem("username", user.username);
-        sessionStorage.setItem("refreshToken", data.refreshToken);
-        sessionStorage.setItem("accessToken", data.accessToken);
-
-        messageApi.success("Sign in successful");
-        router.push("/customer/");
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message || "An error occurred. Please try again.";
-        console.error("There was an error!", error);
-        messageApi.error(errorMessage);
-      })
-      .finally(() => {
-        setLoading(false); // Ẩn Spin sau khi xử lý xong
-      });
+    try{
+      const {user,data} = signIn(username, password);
+      sessionStorage.setItem("username", user.username);
+      sessionStorage.setItem("refreshToken", data.refreshToken);
+      sessionStorage.setItem("accessToken", data.accessToken);
+      messageApi.success("Sign in successful");
+      router.push("/customer/");
+    }
+    catch (error) {
+      console.error("Error during sign-in:", error);
+      messageApi.error("Sign in failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

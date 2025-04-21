@@ -15,5 +15,16 @@ function refreshToken(){
     })
     .catch(err => console.log(err))
 }
-
+function signIn(username, password){
+    return axiosInstance.post('/auth/signin/', {
+        username: username,
+        password: password
+    })
+    .then(res => {
+        if(res.status === 200){
+            return res.data.data.accessToken;
+        }
+    })
+    .catch(err => console.log(err))
+}
 export {refreshToken};
