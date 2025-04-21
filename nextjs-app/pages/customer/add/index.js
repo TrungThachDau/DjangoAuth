@@ -1,0 +1,100 @@
+import NavBar from "@/components/nav_bar";
+import { Button, DatePicker, Form, Input, message } from "antd";
+import axiosInstance from "@/axios.js";
+import dayjs from "dayjs";
+import { refreshToken } from "@/services/authentication";
+import { useState } from "react";
+import { useRouter } from "next/router";
+import './styles.css';
+const AddCustomer = () => {
+  const [messageApi, contextHolder] = message.useMessage();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const onSubmitCustomer = async (values) => {
+    if (!values.name || !values.phone || !values.address || !values.date) {
+      messageApi.error("Please fill in all fields");
+      return;
+    }
+
+    if (values.phone.length < 10 || values.phone.length >10) {
+      messageApi.error("Phone number must be 10 digits");
+      return;
+    }
+
+    const submitData = async (token) => {
+      await axiosInstance.post(
+        "customer/",
+        {
+          name: values.name,
+          phone: values.phone,
+          address: values.address,
+          date: dayjs(values.date).format("YYYY-MM-DD"),
+        },
+        {
+          headers: { Authorization: "Bearer " + token },
+        }
+      );
+    };
+
+    setLoading(true); 
+    try {
+      await submitData(sessionStorage.getItem("accessToken"));
+      messageApi.success("Customer added successfully");
+    } catch (error) {
+      if (error.response?.status === 401) {
+        try {
+          const newToken = await refreshToken();
+          sessionStorage.setItem("accessToken", newToken);
+          await submitData(newToken);
+          messageApi.success("Customer added successfully");
+        } catch (refreshError) {
+          messageApi.error("Failed to refresh token. Please log in again.");
+          console.error("Error refreshing token:", refreshError);
+          router.push("/auth/sign-in"); 
+        }
+      } else {
+        messageApi.error(error.response?.data?.message || "An error occurred");
+        console.error("Error adding customer:", error);
+      }
+    } finally {
+      setLoading(false); 
+    }
+  };
+
+  return (
+    <>
+      <NavBar />
+      <div className="signin-container">
+        <div className="signin-content">
+          <Form onFinish={onSubmitCustomer}>
+            <h3>Add new customer</h3>
+            <Form.Item name="name">
+              <Input className="signin-input" placeholder="Name" />
+            </Form.Item>
+            <Form.Item name="address">
+              <Input className="signin-input" placeholder="Address" />
+            </Form.Item>
+            <Form.Item name="phone">
+              <Input className="signin-input" placeholder="Phone" />
+            </Form.Item>
+            <Form.Item name="date">
+              <DatePicker className="signin-input" />
+            </Form.Item>
+            {contextHolder}
+            <Button
+              className="signin-button"
+              htmlType="submit"
+              loading={loading}
+              disabled={loading}
+            >
+              Submit
+            </Button>
+          </Form>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default AddCustomer;

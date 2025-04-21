@@ -1,12 +1,10 @@
 import './change_password.css';
 import { Button, Input, Form, message} from 'antd';
-import {useNavigate} from "react-router-dom";
 import axiosInstance from '/src/axios.js';
 import NavBar from "../../../components/nav_bar/nav_bar.jsx";
 const ChangePassword = () => {
 
     const [messageApi, contextHolder] = message.useMessage();
-    const navigate = useNavigate();
 
     const onSubmitChange= (values) => {
         if (!values.username || !values.password) {
@@ -25,7 +23,7 @@ const ChangePassword = () => {
                 .then(() => {
                     messageApi.success('Change successful').then(r => console.log(r));
                 })
-                .catch(error0 => {
+                .catch(error => {
                     messageApi.error(error.response.data.message).then(r => console.log(r));
                 });
 

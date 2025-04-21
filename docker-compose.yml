@@ -11,12 +11,12 @@ services:
       - default
   frontend:
     build:
-      context: ./auth-react-app
+      context: ./nextjs-app
       dockerfile: Dockerfile
     networks:
       - default
     ports:
-      - "5173:5173"
+      - "3000:3000"
   nginx:
     build:
       context: ./nginx

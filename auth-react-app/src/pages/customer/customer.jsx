@@ -3,19 +3,21 @@ import NavBar from "../../components/nav_bar/nav_bar.jsx";
 import { Button, Modal, Space, Table, message } from "antd";
 import axiosInstance from "../../axios.js";
 import { Link } from "react-router-dom";
-
+import {refreshToken} from "../../services/authencation.js";
+import MessageDialog from "../../components/message_dialog/message_dialog.jsx";
 const Customer = () => {
   const [data, setData] = useState([]);
   const [customerId, setCustomerId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-
+  const [loading, setLoading] = useState(true);
   const showModal = (id) => {
     setCustomerId(id);
     setIsModalOpen(true);
   };
 
   const handleOk = () => {
+    setLoading(true);
     deleteCustomer(customerId);
     setIsModalOpen(false);
   };
@@ -24,18 +26,34 @@ const Customer = () => {
     setIsModalOpen(false);
   };
 
-  const deleteCustomer = (id) => {
-    axiosInstance
-      .delete(`customer/${id}/`, {
+  const deleteCustomer = async (id) => {
+    try {
+      await axiosInstance.delete(`customer/${id}/`, {
         headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
-      })
-      .then(() => {
-        messageApi.success("Customer deleted successfully").then(r => (console.log(r)));
-        setData(data.filter((item) => item.id !== id));
-      })
-      .catch((error) => {
-        messageApi.error(error.response?.data?.message || "An error occurred");
       });
+      messageApi.success("Customer deleted successfully");
+      setData(data.filter((item) => item.id !== id));
+    } catch (error) {
+      if (error.response?.status === 401) {
+        try {
+          const newToken = await refreshToken();
+          sessionStorage.setItem("accessToken", newToken);
+          await axiosInstance.delete(`customer/${id}/`, {
+            headers: { Authorization: "Bearer " + newToken },
+          });
+          
+          messageApi.success("Customer deleted successfully");
+          setData(data.filter((item) => item.id !== id));
+          setLoading(false);
+        } catch (refreshError) {
+          messageApi.error("Failed to refresh token. Please log in again.");
+          console.error("Error refreshing token:", refreshError);
+        }
+      } else {
+        messageApi.error(error.response?.data?.message || "An error occurred");
+        console.error("Error deleting customer:", error);
+      }
+    }
   };
 
   const columns = [
@@ -80,20 +98,38 @@ const Customer = () => {
       ),
     },
   ];
-
   useEffect(() => {
-    axiosInstance
-      .get("customer/", {
-        headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
-      })
-      .then((response) => {
+    const fetchCustomerData = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get("customer/", {
+          headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
+        });
         setData(response.data);
         localStorage.setItem("customerData", JSON.stringify(response.data));
-      })
-      .catch((error) => {
-        console.error("Error fetching customer data:", error);
-      });
+      } catch (error) {
+        if (error.response?.status === 401) {
+          try {
+            const newToken = await refreshToken();
+            sessionStorage.setItem("accessToken", newToken);
+            await fetchCustomerData();
+          } catch (refreshError) {
+            console.error("Error refreshing token:", refreshError);
+          }
+        } else {
+            messageApi.error(error.response?.data?.message || "An error occurred");
+            console.error("Error fetching customer data:", error);
+        }
+        
+      }
+      finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchCustomerData();
   }, []);
+
 
   return (
     <div>
@@ -104,7 +140,7 @@ const Customer = () => {
             Add Customer
           </Button>
         </Link>
-        <Table dataSource={data} columns={columns} rowKey="id" />
+        <Table dataSource={data} columns={columns} rowKey="id" loading={loading} />
       </div>
       <Modal title="Delete" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
         <p>Are you sure you want to delete this customer?</p>
