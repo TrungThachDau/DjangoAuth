@@ -1,32 +1,56 @@
-
 import { Dropdown, Space } from 'antd';
-import { DownOutlined,} from '@ant-design/icons';
-const items = [
-  {
-    key: '1',
-    label: (
-        <a href="/auth/change-password" className="nav-link">
-            Change password
-        </a>
-    ),
-  },
-    {
-        key: '2',
-        label: (
-        <a href="/auth/sign-out" className="nav-link">
-            Sign out
-        </a>
-    ),
+import { DownOutlined } from '@ant-design/icons';
+import { signOut } from '@/services/authentication';
+import { useRouter } from 'next/router';
+
+const onSignOut = async (router) => {
+  const refreshToken = sessionStorage.getItem('refreshToken');
+  console.log(refreshToken);
+  try {
+    const response = await signOut(refreshToken);
+    console.log(response);
+    sessionStorage.clear();
+    router.push('/auth/sign-in');
+  } catch (error) {
+    console.error('Error signing out:', error);
   }
-];
-const MyDrop = (props) => (
-  <Dropdown menu={{ items }}>
-    <a onClick={e => e.preventDefault()} style={{color:"white"}}>
-      <Space>
+};
+
+const MyDrop = (props) => {
+  const router = useRouter(); 
+
+  const items = [
+    {
+      key: '1',
+      label: (
+        <a href="/auth/change-password" className="nav-link">
+          Change password
+        </a>
+      ),
+    },
+    {
+      key: '2',
+      label: (
+        <a
+          onClick={() => onSignOut(router)}
+          className="nav-link"
+        >
+          Sign out
+        </a>
+      ),
+    },
+  ];
+
+  return (
+    <Dropdown menu={{ items }}>
+      <a onClick={(e) => e.preventDefault()} style={{ color: 'white' }}>
+        <Space>
           {props.status}
-        <DownOutlined color="white"/>
-      </Space>
-    </a>
-  </Dropdown>
-);
+          <DownOutlined color="white" />
+        </Space>
+      </a>
+    </Dropdown>
+  );
+};
+
 export default MyDrop;

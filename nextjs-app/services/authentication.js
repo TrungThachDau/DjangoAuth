@@ -1,10 +1,10 @@
+
 import axiosInstance from "../axios";
 
-
-function refreshToken(){
+export function refreshToken(){
     const refreshToken = sessionStorage.getItem('refreshToken');
     console.log(refreshToken);
-    return axiosInstance.post('/auth/token/refresh/',{
+    return axiosInstance.post('/token/refresh/',{
         refresh:refreshToken
     })
     .then(res => {
@@ -15,16 +15,17 @@ function refreshToken(){
     })
     .catch(err => console.log(err))
 }
-function signIn(username, password){
-    return axiosInstance.post('/auth/signin/', {
-        username: username,
-        password: password
-    })
-    .then(res => {
-        if(res.status === 200){
-            return res.data.data.accessToken;
-        }
-    })
-    .catch(err => console.log(err))
+export async function signIn(username, password) {
+  return await axiosInstance.post("/auth/signin/", { username, password })
+  .catch(err =>{
+    throw err.response.data;
+  })
 }
-export {refreshToken};
+
+export async function signOut(refreshToken){
+  await axiosInstance.post('/auth/sign-out/',{refreshToken})
+  .then(res => {
+      return res.data;
+  })
+  .catch(err => console.log(err))
+}
