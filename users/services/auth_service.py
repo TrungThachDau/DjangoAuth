@@ -1,4 +1,5 @@
 from django.contrib.auth.hashers import check_password, make_password
+from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.tokens import RefreshToken, UntypedToken
 from rest_framework_simplejwt.exceptions import TokenError
 from users.models import Employee
@@ -13,6 +14,22 @@ class AuthService:
             'refreshToken': str(refresh),
             'accessToken': str(refresh.access_token),
         }
+    def get_user_from_token(self, Token):
+        token_backend = TokenBackend(algorithm='HS256')
+        user_decode = token_backend.decode(Token, verify=False)
+        user_id = user_decode.get('user_id')
+        if user_id:
+            user = Employee.objects.filter(id=user_id).first()
+            if user:
+                return {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'is_changed_password': user.is_changed_password,
+                    'role': user.role.id,
+                }
+            else:
+                raise ValueError("Token invalid")
     def get_user(self, request_data):
         username = request_data.get('username')
         if not username:
@@ -29,10 +46,16 @@ class AuthService:
         else:
             raise ValueError("User not found")
     def sign_up(self, request_data):
+
+        request_data['role']=2
         serializer = SignUpSerializer(data=request_data)
+
         if serializer.is_valid():
+            #set role
             serializer.save()
-            return serializer.data
+            token = self.get_token_for_user(serializer.instance)
+
+            return token
         else:
             error_messages = []
             for field, errors in serializer.errors.items():
@@ -49,8 +72,6 @@ class AuthService:
         if user:
             if not check_password(password, user.hashed_password):
                 raise ValueError("Invalid password")
-            if not user.is_changed_password:
-                raise ValueError("Password not changed. Please change new password")
             token = self.get_token_for_user(user)
             return token
         else:
@@ -64,7 +85,8 @@ class AuthService:
         return {"message": "Ok"}
 
     def change_password(self, request_data):
-        username = request_data.get('username')
+        user = self.get_user_from_token(request_data.get('accessToken'))
+        username = user.get('username')
         old_password = request_data.get('old_password')
         new_password = request_data.get('new_password')
         if not username or not old_password or not new_password:
@@ -94,7 +116,7 @@ class AuthService:
             token = self.get_token_for_user(user)
             send_mail(
                 "Reset Password",
-                "https://master.d1xxb9w4wrs7q.amplifyapp.com/confirm-password?token=" + str(token['refreshToken'])+'&username=' + str(username),
+                "https://master.d1xxb9w4wrs7q.amplifyapp.com/confirm-password?token=" + str(token['refreshToken']),
                 "quangtrung.nguyen.2016@gmail.com",
                 [user.email],
                 fail_silently=False,
@@ -104,16 +126,15 @@ class AuthService:
             raise ValueError("Invalid credentials")
 
     def confirm_new_password(self, request_data, token):
-        username = request_data.get('username')
+        user = self.get_user_from_token(token)
+        username = user.get('username')
         new_password = request_data.get('new_password')
-
         if not username or not new_password:
             raise ValueError("Username and new password are required")
         try:
             UntypedToken(token)
         except TokenError as e:
             raise ValueError(f"Invalid token: {e}")
-
         user = Employee.objects.filter(username=username).first()
         if user:
             user.hashed_password = make_password(new_password)

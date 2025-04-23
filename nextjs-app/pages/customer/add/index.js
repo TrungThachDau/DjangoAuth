@@ -1,3 +1,4 @@
+"use cache"
 import NavBar from "@/components/nav_bar";
 import { Button, DatePicker, Form, Input, message } from "antd";
 import axiosInstance from "@/axios.js";

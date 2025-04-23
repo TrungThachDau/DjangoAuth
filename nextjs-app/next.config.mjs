@@ -37,6 +37,12 @@ const nextConfig = {
         "rc-upload",
         "rc-util",
       ],
+    i18n:{
+        locales: ["en","vi"],
+        defaultLocale:"en",
+        localeDetection:true,
+
+    }
 };
 
 export default nextConfig;

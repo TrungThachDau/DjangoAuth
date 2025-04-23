@@ -22,7 +22,7 @@ export default async function SignUp() {
         name: values.name,
       })
       .then((response) => {
-        console.log(response.data);
+
         messageApi.success("Sign up successful. Please sign in").then(r => console.log(r));
       })
       .catch((error) => {

@@ -35,7 +35,7 @@ export default function ResetPassword() {
 
   return (
     <>
-      <NavBar />
+
       <div className="signin-container">
         <div className="signin-content">
           <h2>Reset password</h2>

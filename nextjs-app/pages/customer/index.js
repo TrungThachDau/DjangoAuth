@@ -4,6 +4,7 @@ import { Button, Modal, Space, Table, message } from "antd";
 import axiosInstance from "@/axios.js";
 import Link  from "next/link";
 import {refreshToken} from "@/services/authentication";
+import {router} from "next/client";
 
 const Customer = () => {
   const [data, setData] = useState([]);
@@ -106,6 +107,7 @@ const Customer = () => {
       ),
     },
   ];
+
   useEffect(() => {
     const fetchCustomerData = async () => {
       try {
@@ -116,28 +118,48 @@ const Customer = () => {
         setData(response.data);
         localStorage.setItem("customerData", JSON.stringify(response.data));
       } catch (error) {
-        if (error.response?.status === 401) {
+        await handleApiError(error, fetchCustomerData);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const handleApiError = async (error, retryFunction) => {
+      const isRetrying = sessionStorage.getItem("isRetrying");
+
+      if (error.response?.status === 400 || error.response?.status === 403) {
+        // Lỗi 400 hoặc 403: Đăng xuất ngay lập tức
+        sessionStorage.clear();
+        await router.push("/auth/sign-in");
+      } else if (error.response?.status === 401) {
+        // Lỗi 401: Chỉ thử lại một lần
+        if (!isRetrying) {
           try {
+            sessionStorage.setItem("isRetrying", "true"); // Đánh dấu đã thử lại
             const newToken = await refreshToken();
             sessionStorage.setItem("accessToken", newToken);
-            await fetchCustomerData();
+            await retryFunction(); // Thử lại hàm ban đầu
           } catch (refreshError) {
+            sessionStorage.clear();
+            await router.push("/auth/sign-in");
             console.error("Error refreshing token:", refreshError);
+          } finally {
+            sessionStorage.removeItem("isRetrying"); // Xóa trạng thái thử lại
           }
         } else {
-            messageApi.error(error.response?.data?.message || "An error occurred");
-            console.error("Error fetching customer data:", error);
+          // Nếu đã thử lại mà vẫn lỗi, đăng xuất
+          sessionStorage.clear();
+          await router.push("/auth/sign-in");
         }
-
-      }
-      finally {
-        setLoading(false);
+      } else {
+        // Các lỗi khác: Hiển thị thông báo lỗi
+        messageApi.error(error.response?.data?.message || "An error occurred");
+        console.error("Error:", error);
       }
     };
 
     fetchCustomerData();
   }, []);
-
 
   return (
     <div>

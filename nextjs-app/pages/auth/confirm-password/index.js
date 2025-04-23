@@ -13,14 +13,13 @@ export default function ConfirmPassword() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
-  const username = searchParams.get("username");
 
-  useEffect(() => {
-    if (!token) {
-      messageApi.error("Invalid or missing token. Redirecting to sign-in page.");
-      router.push("/auth/sign-in");
-    }
-  }, [token, router]);
+  // useEffect(() => {
+  //   if (!token) {
+  //     messageApi.error("Invalid or missing token. Redirecting to sign-in page.");
+  //     router.push("/auth/sign-in");
+  //   }
+  // }, [token, router]);
 
   const onSubmitLogin = (values) => {
     if (!values.password || values.password.length < 8) {
@@ -31,7 +30,6 @@ export default function ConfirmPassword() {
     const url = `/confirm-new-password/${token}/`;
     axiosInstance
       .post(url, {
-        username: username,
         new_password: values.password,
       })
       .then(response => {
@@ -52,7 +50,7 @@ export default function ConfirmPassword() {
 
   return (
     <>
-      <NavBar />
+      {/*<NavBar />*/}
       <div className="signin-container">
         <div className="signin-content">
           <h2>Confirm password</h2>
@@ -69,6 +67,7 @@ export default function ConfirmPassword() {
             >
               Submit
             </Button>
+
             <Link href="/sign-up" className="forgot-password">
               Create a new account
             </Link>

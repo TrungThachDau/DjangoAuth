@@ -1,76 +1,115 @@
 import "./sign_in.css";
-import { Button, Input, Form, message, Spin } from "antd";
+import {Button, Input, Form, message, Spin, Modal} from "antd";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { signIn } from "@/services/authentication";
-
+import {refreshToken, signIn, signOut} from "@/services/authentication";
+import { getTranslations } from '@/lib/i18n';
+import {redirect} from "next/navigation";
 export default function SignIn() {
+  const {locale} = useRouter();
+  const t = getTranslations(locale);
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
+  const [open, setOpen] = useState(false);
   useEffect(() => {
     if (typeof window !== "undefined" && sessionStorage.getItem("refreshToken")) {
       router.push("/customer/");
     }
   }, []);
 
+  const showModal = () => {
+    setOpen(true);
+  };
+
   const onSubmitLogin = async (values) => {
     const { username, password } = values;
 
     if (!username || !password) {
-      return messageApi.error("Please fill in both username and password");
+      return messageApi.error(t.sign_in_validate_error);
     }
-
-    // if (password.length < 6) {
-    //   return messageApi.error("Password must be at least 6 characters long");
-    // }
 
     setLoading(true);
     try {
-      const response= await signIn(username, password);
-      if (response.status===200){
-        sessionStorage.setItem("username", response.data.user.username);
-        sessionStorage.setItem("refreshToken", response.data.data.refreshToken);
-        sessionStorage.setItem("accessToken", response.data.data.accessToken);
-        messageApi.success("Sign in successful");
-        router.push("/customer/");
+      const response = await signIn(username, password);
+
+      if (response.status === 200) {
+        const { user, data } = response.data;
+
+        
+        sessionStorage.setItem("username", user.username);
+        sessionStorage.setItem("refreshToken", data.refreshToken);
+        sessionStorage.setItem("accessToken", data.accessToken);
+
+        if (!user.is_changed_password) {
+          showModal(); 
+        } else {
+          messageApi.success(t.sign_in_success);
+          await router.push("/customer/");
+        }
+      } else {
+        messageApi.error(t.sign_in_failed);
       }
-      
     } catch (error) {
-      const errorMessage = error.response?.data?.message;
-      console.error(error);
-      messageApi.error(errorMessage);
+      if (error.response?.status === 401) {
+        messageApi.error(t.invalid_credentials);
+      } else if (error.response?.data?.message === "Password has not been changed") {
+        showModal();
+      } else {
+        messageApi.error(error.response?.data?.message || t.sign_in_error);
+      }
+      console.error("Error during sign-in:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const okModal = () => {
+    router.push("/auth/change-password");
+  };
+
+  const cancelModal = () => {
+    setOpen(false);
+    sessionStorage.clear();
+    router.push("/auth/sign-in");
   };
 
   return (
     <>
       <div className="signin-container">
         <div className="signin-content">
-          <h2>Sign in</h2>
+          <h2>{t.sign_in_title}</h2>
           <Form onFinish={onSubmitLogin}>
             <Form.Item name="username">
-              <Input className="signin-input" placeholder="Email or phone number" />
+              <Input className="signin-input" placeholder={`${t["username_placeholder"]}`} />
             </Form.Item>
             <Form.Item name="password">
-              <Input.Password className="signin-input" placeholder="Password" />
+              <Input.Password className="signin-input" placeholder={`${t["password_placeholder"]}`} />
             </Form.Item>
             {contextHolder}
             <Button className="signin-button" htmlType="submit" disabled={loading}>
-              {loading ? <Spin size="small" /> : "Sign In"}
+              {loading ? <Spin size="small" /> : t.sign_in_button}
             </Button>
-            <Link href="/reset-password" className="forgot-password">
-              Reset password?
+            <Link href="/auth/reset-password" className="forgot-password">
+              {t.rspw}
             </Link>
             <Link href="/auth/sign-up" className="forgot-password">
-              Create a new account
+                {t.create_account}
             </Link>
           </Form>
         </div>
+            <Modal
+            title="Error"
+            open={open}
+            onOk={okModal}
+            onCancel={cancelModal}
+            okText="Ok"
+            cancelText="Sign out"
+          >
+            <p>Please change your password</p>
+          </Modal>
+
       </div>
     </>
   );

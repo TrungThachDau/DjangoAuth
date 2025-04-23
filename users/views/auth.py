@@ -28,7 +28,7 @@ async def sign_up(request):
     try:
         auth_service = AuthService()
         new_user = await sync_to_async(auth_service.sign_up)(request.data)
-        return Response({"status": "success", "message": "User created successfully","data":new_user.serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({"status": "success", "message": "User created successfully","data":new_user}, status=status.HTTP_201_CREATED)
     except ValueError as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['POST'])
