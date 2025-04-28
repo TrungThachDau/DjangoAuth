@@ -27,8 +27,9 @@ async def sign_in(request):
 async def sign_up(request):
     try:
         auth_service = AuthService()
-        new_user = await sync_to_async(auth_service.sign_up)(request.data)
-        return Response({"status": "success", "message": "User created successfully","data":new_user}, status=status.HTTP_201_CREATED)
+        token = await sync_to_async(auth_service.sign_up)(request.data)
+        user = await sync_to_async(auth_service.get_user)(request.data)
+        return Response({"status": "success", "message": "User created successfully","data":token,"user":user}, status=status.HTTP_201_CREATED)
     except ValueError as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['POST'])
@@ -52,8 +53,8 @@ async def confirm_new_password(request,token):
     except ValueError as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['POST'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
+@authentication_classes([BasicAuthentication])
+@permission_classes([AllowAny])
 async def change_password(request):
     try:
         auth_service = AuthService()
@@ -69,5 +70,27 @@ async def sign_out(request):
         auth_service = AuthService()
         await sync_to_async(auth_service.sign_out)(request.data)
         return Response({"status":"success"},status=status.HTTP_200_OK)
+    except ValueError as e:
+        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+async def get_user(request):
+    try:
+        auth_service = AuthService()
+        res =  await sync_to_async(auth_service.get_user)(request)
+        return Response({"data":res},status=status.HTTP_200_OK)
+    except ValueError as e:
+        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([AllowAny])
+async def get_user2(request,token):
+    try:
+        auth_service = AuthService()
+        res =  await sync_to_async(auth_service.get_user2)(request,token)
+        return Response({"data":res},status=status.HTTP_200_OK)
     except ValueError as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

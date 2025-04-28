@@ -15,8 +15,25 @@ class AuthService:
             'accessToken': str(refresh.access_token),
         }
     def get_user_from_token(self, Token):
-        token_backend = TokenBackend(algorithm='HS256')
-        user_decode = token_backend.decode(Token, verify=False)
+        token_backend = TokenBackend(algorithm='HS256',signing_key='django-insecure-oackllfw##1c!#hhtg3b8=f_$8rq+oe*#$f=#1qfa-bb@qhn*+')
+        user_decode = token_backend.decode(Token, verify=True)
+        user_id = user_decode.get('user_id')
+        if user_id:
+            user = Employee.objects.filter(id=user_id).first()
+            if user:
+                return {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'is_changed_password': user.is_changed_password,
+                    'role': user.role.id,
+                }
+            else:
+                raise ValueError("Token invalid")
+    def get_user2(self, request_data,Token):
+        
+        token_backend = TokenBackend(algorithm='HS256',signing_key='django-insecure-oackllfw##1c!#hhtg3b8=f_$8rq+oe*#$f=#1qfa-bb@qhn*+')
+        user_decode = token_backend.decode(Token, verify=True)
         user_id = user_decode.get('user_id')
         if user_id:
             user = Employee.objects.filter(id=user_id).first()
@@ -111,7 +128,8 @@ class AuthService:
 
     def reset_password(self,request_data):
         username = request_data.get('username')
-        user = Employee.objects.filter(username=username).first()
+        email = request_data.get('email')
+        user = Employee.objects.filter(username=username, email=email).first()
         if user:
             token = self.get_token_for_user(user)
             send_mail(

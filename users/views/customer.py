@@ -8,11 +8,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from users.services.customer_service import CustomerService
 class CustomerView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated,IsAdminUser]
+    permission_classes = [IsAuthenticated]
     async def get(self, request):
         try:
             customer_sv = CustomerService()
-            response =await  sync_to_async(customer_sv.get_customer_list)(request)
+            response = await sync_to_async(customer_sv.get_customer_list)(request)
             return Response(response, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -31,7 +31,7 @@ class CustomerDetailView(APIView):
     # authentication_classes = [BasicAuthentication]
     # permission_classes = [AllowAny]
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated]
     async def get(self, request, pk):
         try:
             customer_sv = CustomerService()

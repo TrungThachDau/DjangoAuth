@@ -3,6 +3,7 @@ import { Button, Input, Form, message } from "antd";
 import axiosInstance from "../../../axios";
 import NavBar from "../../../components/nav_bar";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function ResetPassword() {
   const [messageApi, contextHolder] = message.useMessage();
@@ -17,6 +18,7 @@ export default function ResetPassword() {
     axiosInstance
       .post("/auth/reset-password/", {
         username: values.username,
+        email: values.email,
       })
       .then((response) => {
         console.log(response.data);
@@ -43,6 +45,9 @@ export default function ResetPassword() {
             <Form.Item name="username">
               <Input className="signin-input" placeholder="Username" />
             </Form.Item>
+            <Form.Item name="email">
+              <Input className="signin-input" placeholder="Email" />
+            </Form.Item>
             {contextHolder}
             <Button
               className="signin-button"
@@ -53,6 +58,7 @@ export default function ResetPassword() {
               Submit
             </Button>
           </Form>
+          <Link href="/auth/sign-in" className="forgot-password"> Back to Sign in</Link>
         </div>
       </div>
     </>

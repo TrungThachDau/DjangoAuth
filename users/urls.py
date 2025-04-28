@@ -19,7 +19,8 @@ urlpatterns = [
     path('confirm-new-password/<str:token>/',confirm_new_password, name="confirm_new_password"),
 
     path('auth/change-password/', change_password, name='change_password'),
-
+    path('auth/user/', get_user, name='get_user'),
+    path('auth/user2/<str:token>/', get_user2, name='get_user2'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),

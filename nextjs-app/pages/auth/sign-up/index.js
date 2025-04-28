@@ -1,7 +1,7 @@
-import "./sign_up.css";
-import { Button, Input, Form, message } from "antd";
+import { Button, Form, Input, message } from "antd";
 import Link from "next/link";
 import axiosInstance from "../../../axios.js";
+import "./sign_up.css";
 
 export default async function SignUp() {
   const [messageApi, contextHolder] = message.useMessage();
@@ -21,9 +21,8 @@ export default async function SignUp() {
         email: values.email,
         name: values.name,
       })
-      .then((response) => {
-
-        messageApi.success("Sign up successful. Please sign in").then(r => console.log(r));
+      .then(async (response) => {
+        return messageApi.error("Sign up successful.").then(r => console.log(r));
       })
       .catch((error) => {
         const errorMessage =

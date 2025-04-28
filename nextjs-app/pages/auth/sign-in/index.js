@@ -1,11 +1,10 @@
-import "./sign_in.css";
-import {Button, Input, Form, message, Spin, Modal} from "antd";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import {refreshToken, signIn, signOut} from "@/services/authentication";
 import { getTranslations } from '@/lib/i18n';
-import {redirect} from "next/navigation";
+import { signIn } from "@/services/authentication";
+import { Button, Form, Input, message, Modal, Spin } from "antd";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import "./sign_in.css";
 export default function SignIn() {
   const {locale} = useRouter();
   const t = getTranslations(locale);
@@ -36,12 +35,10 @@ export default function SignIn() {
 
       if (response.status === 200) {
         const { user, data } = response.data;
-
-        
         sessionStorage.setItem("username", user.username);
         sessionStorage.setItem("refreshToken", data.refreshToken);
         sessionStorage.setItem("accessToken", data.accessToken);
-
+        
         if (!user.is_changed_password) {
           showModal(); 
         } else {
@@ -57,7 +54,7 @@ export default function SignIn() {
       } else if (error.response?.data?.message === "Password has not been changed") {
         showModal();
       } else {
-        messageApi.error(error.response?.data?.message || t.sign_in_error);
+        messageApi.error("Error during sign-in" || t.sign_in_error);
       }
       console.error("Error during sign-in:", error);
     } finally {
@@ -109,7 +106,6 @@ export default function SignIn() {
           >
             <p>Please change your password</p>
           </Modal>
-
       </div>
     </>
   );

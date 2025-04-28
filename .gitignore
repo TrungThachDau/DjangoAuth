@@ -3,3 +3,6 @@ node_modules
 .amplify
 amplify_outputs*
 amplifyconfiguration*
+
+__pycache__/
+@/__pycache__/__init__.cpython-313.pyc
