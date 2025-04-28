@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.tokens import RefreshToken, UntypedToken
@@ -15,7 +16,7 @@ class AuthService:
             'accessToken': str(refresh.access_token),
         }
     def get_user_from_token(self, Token):
-        token_backend = TokenBackend(algorithm='HS256',signing_key='django-insecure-oackllfw##1c!#hhtg3b8=f_$8rq+oe*#$f=#1qfa-bb@qhn*+')
+        token_backend = TokenBackend(algorithm='HS256',signing_key=settings.SECRET_KEY)
         user_decode = token_backend.decode(Token, verify=True)
         user_id = user_decode.get('user_id')
         if user_id:
@@ -32,7 +33,7 @@ class AuthService:
                 raise ValueError("Token invalid")
     def get_user2(self, request_data,Token):
         
-        token_backend = TokenBackend(algorithm='HS256',signing_key='django-insecure-oackllfw##1c!#hhtg3b8=f_$8rq+oe*#$f=#1qfa-bb@qhn*+')
+        token_backend = TokenBackend(algorithm='HS256',signing_key=settings.SECRET_KEY)
         user_decode = token_backend.decode(Token, verify=True)
         user_id = user_decode.get('user_id')
         if user_id:
