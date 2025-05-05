@@ -5,7 +5,7 @@ from adrf.views import APIView
 from adrf.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from users.models.employee import Employee
+from users.models.account import Account
 from rest_framework import status
 from users.serializers.employee import EmployeeSerializer
 
@@ -14,14 +14,14 @@ class EmployeeView(APIView):
     permission_classes = [IsAuthenticated]
     async def retrieve(self, request, pk,*args, **kwargs):
         try:
-            book = await sync_to_async(Employee.objects.filter(id=pk).first, thread_sensitive=True)()
+            book = await sync_to_async(Account.objects.filter(id=pk).first, thread_sensitive=True)()
             serializer = EmployeeSerializer(book)
             return Response(serializer.data)
-        except Employee.DoesNotExist:
+        except Account.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
     async def list(self, request, *args, **kwargs):
         try:
-            books = await sync_to_async(Employee.objects.all)()
+            books = await sync_to_async(Account.objects.all)()
             serializer = EmployeeSerializer(books, many=True)
             return Response(serializer.data)
         except Exception as e:
@@ -47,7 +47,7 @@ class EmployeeView(APIView):
 
     async def update(self, request, id):
         try:
-            book =await sync_to_async(Employee.objects.filter(id=id).first(),thread_sensitive=True)()
+            book =await sync_to_async(Account.objects.filter(id=id).first(),thread_sensitive=True)()
             serializer = EmployeeSerializer(book=book, data=request.data)
             if serializer.is_valid():
                 await sync_to_async(serializer.save,thread_sensitive=True)()
@@ -57,7 +57,7 @@ class EmployeeView(APIView):
 
     async def destroy(self, request, pk, **kwargs):
         try:
-            book = await sync_to_async(Employee.objects.filter(id=pk).first, thread_sensitive=True)()
+            book = await sync_to_async(Account.objects.filter(id=pk).first, thread_sensitive=True)()
             if book is not None:
                 await sync_to_async(book.delete, thread_sensitive=True)()
                 return Response(status=status.HTTP_204_NO_CONTENT)

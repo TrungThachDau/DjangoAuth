@@ -1,5 +1,7 @@
 from users.models import Customer
+from users.serializers.account import AccountSerializer
 from users.serializers.customer import CustomerSerializer
+from django.db import transaction
 
 
 class CustomerService:
@@ -11,16 +13,47 @@ class CustomerService:
             return serializer.data
         else:
             raise ValueError(serializer.errors)
-    def create_new_customer(self,request,**kwargs):
+    
+    def create_new_customer(self, request):
         user = request.user
-        customer_data = request.data
-        customer_data['employee'] = user.id
-        serializer = CustomerSerializer(data=customer_data)
-        if serializer.is_valid():
-            serializer.save()
-            return serializer.data
-        else:
-            raise ValueError(serializer.errors)
+
+        # Dữ liệu cho Account
+        new_account = {
+            'username': request.data.get('username'),
+            'email': request.data.get('email'),
+            'password': "12345678",  # Mật khẩu mặc định (nên thay bằng mật khẩu ngẫu nhiên)
+            'hashed_password': request.data.get('hashed_password'),  # Sửa lỗi chính tả
+        }
+
+        # Dữ liệu cho Customer
+        customer_data = {
+            'address': request.data.get('address'),
+            'phone': request.data.get('phone'),
+            'date': request.data.get('date'),
+            'employee': user.id,  # Liên kết với nhân viên hiện tại
+            'name': request.data.get('name'),
+        }
+
+        # Sử dụng transaction để đảm bảo tính toàn vẹn dữ liệu
+        with transaction.atomic():
+            # Tạo Account
+            account_serializer = AccountSerializer(data=new_account)
+            if account_serializer.is_valid():
+                account = account_serializer.save()
+                customer_data['account'] = account.id  # Liên kết Account với Customer
+
+                # Tạo Customer
+                customer_serializer = CustomerSerializer(data=customer_data)
+                if customer_serializer.is_valid():
+                    customer = customer_serializer.save()
+                    return customer_serializer.data
+                else:
+                    # Nếu Customer gặp lỗi, transaction sẽ rollback
+                    raise ValueError(customer_serializer.errors)
+            else:
+                # Nếu Account gặp lỗi, transaction sẽ rollback
+                raise ValueError(account_serializer.errors)
+    
     def update_customer(self,request,customer_id):
         customer = Customer.objects.filter(id=customer_id).first()
         user = request.user
@@ -34,6 +67,7 @@ class CustomerService:
                 raise ValueError(serializer.errors)
         else:
             raise ValueError("Customer not found")
+    
     def delete_customer(self,request,customer_id):
         customer = Customer.objects.filter(id=customer_id).first()
         user = request.user
@@ -42,6 +76,7 @@ class CustomerService:
             return {"message": "Customer deleted successfully"}
         else:
             raise ValueError("Customer not found")
+    
     def get_customer_detail(self,request,customer_id):
         customer = Customer.objects.filter(id=customer_id).first()
         # user = request.user

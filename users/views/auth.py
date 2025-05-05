@@ -2,7 +2,7 @@ from asgiref.sync import sync_to_async
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.decorators import authentication_classes, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsStaff
 from rest_framework.response import Response
 from adrf.decorators import api_view
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -54,7 +54,7 @@ async def confirm_new_password(request,token):
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
-@permission_classes([AllowAny])
+@permission_classes([IsStaff])
 async def change_password(request):
     try:
         auth_service = AuthService()

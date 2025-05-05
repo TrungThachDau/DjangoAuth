@@ -144,7 +144,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
-AUTH_USER_MODEL = 'users.Employee'
+AUTH_USER_MODEL = 'users.Account'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (

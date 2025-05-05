@@ -3,10 +3,16 @@ from django.contrib.auth.hashers import check_password, make_password
 from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.tokens import RefreshToken, UntypedToken
 from rest_framework_simplejwt.exceptions import TokenError
-from users.models import Employee
+from users.models import Account
+from users.models.employee import Employee
+from users.models.employee_role import EmployeeRole
 from users.serializers.auth import SignUpSerializer
 from rest_framework_simplejwt.tokens import api_settings
 from django.core.mail import send_mail
+from django.db import transaction
+
+from users.serializers.employee import EmployeeSerializer
+
 
 class AuthService:
     def get_token_for_user(self,user):
@@ -20,7 +26,7 @@ class AuthService:
         user_decode = token_backend.decode(Token, verify=True)
         user_id = user_decode.get('user_id')
         if user_id:
-            user = Employee.objects.filter(id=user_id).first()
+            user = Account.objects.filter(id=user_id).first()
             if user:
                 return {
                     'id': user.id,
@@ -37,7 +43,7 @@ class AuthService:
         user_decode = token_backend.decode(Token, verify=True)
         user_id = user_decode.get('user_id')
         if user_id:
-            user = Employee.objects.filter(id=user_id).first()
+            user = Account.objects.filter(id=user_id).first()
             if user:
                 return {
                     'id': user.id,
@@ -52,41 +58,55 @@ class AuthService:
         username = request_data.get('username')
         if not username:
             raise ValueError("Username is required")
-        user = Employee.objects.filter(username=username).first()
+        user = Account.objects.filter(username=username).first()
         if user:
             return {
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
                 'is_changed_password': user.is_changed_password,
-                'role': user.role.id,
             }
         else:
             raise ValueError("User not found")
-    def sign_up(self, request_data):
-
-        request_data['role']=2
+    def sign_up(self, request_data, **kwargs):
+        request_data['hashed_password'] = make_password(request_data.get('password'))
         serializer = SignUpSerializer(data=request_data)
+        request_data['is_staff'] = True
 
-        if serializer.is_valid():
-            #set role
-            serializer.save()
-            token = self.get_token_for_user(serializer.instance)
+        with transaction.atomic():
+            if serializer.is_valid():
+                account = serializer.save()
 
-            return token
-        else:
-            error_messages = []
-            for field, errors in serializer.errors.items():
-                for error in errors:
-                    error_messages.append(f"{field}: {error}")
-            raise ValueError("; ".join(error_messages))
+                
+                try:
+                    role = EmployeeRole.objects.get(id=2)
+                except EmployeeRole.DoesNotExist:
+                    raise ValueError("Role with id=2 does not exist")
+
+                
+                employee_data = Employee(
+                    account=account,
+                    role=role,
+                )
+                employee_data.save()
+
+               
+                token = self.get_token_for_user(account)
+                return token
+            else:
+                
+                error_messages = []
+                for field, errors in serializer.errors.items():
+                    for error in errors:
+                        error_messages.append(f"{field}: {error}")
+                raise ValueError("; ".join(error_messages))
 
     def sign_in(self, request_data):
         username = request_data.get('username')
         password = request_data.get('password')
         if not username or not password:
             raise ValueError("Username and password are required")
-        user = Employee.objects.filter(username=username).first()
+        user = Account.objects.filter(username=username).first()
         if user:
             if not check_password(password, user.hashed_password):
                 raise ValueError("Invalid password")
@@ -109,7 +129,7 @@ class AuthService:
         new_password = request_data.get('new_password')
         if not username or not old_password or not new_password:
             raise ValueError("Username, old password and new password are required")
-        user = Employee.objects.filter(username=username).first()
+        user = Account.objects.filter(username=username).first()
         if user:
             if not check_password(old_password, user.hashed_password):
                 raise ValueError("Invalid old password")
@@ -130,7 +150,7 @@ class AuthService:
     def reset_password(self,request_data):
         username = request_data.get('username')
         email = request_data.get('email')
-        user = Employee.objects.filter(username=username, email=email).first()
+        user = Account.objects.filter(username=username, email=email).first()
         if user:
             token = self.get_token_for_user(user)
             send_mail(
@@ -154,7 +174,7 @@ class AuthService:
             UntypedToken(token)
         except TokenError as e:
             raise ValueError(f"Invalid token: {e}")
-        user = Employee.objects.filter(username=username).first()
+        user = Account.objects.filter(username=username).first()
         if user:
             user.hashed_password = make_password(new_password)
             user.is_changed_password = True
@@ -167,5 +187,45 @@ class AuthService:
             return {"message": "Password changed successfully"}
         else:
             raise ValueError("Invalid credentials")
+
+    def create_new_customer(self, request):
+        user = request.user
+
+        # Dữ liệu cho Account
+        new_account = {
+            'username': request.data.get('username'),
+            'email': request.data.get('email'),
+            'password': "12345678",  # Mật khẩu mặc định (nên thay bằng mật khẩu ngẫu nhiên)
+            'hashed_password': request.data.get('hashed_password'),  # Sửa lỗi chính tả
+        }
+
+        # Dữ liệu cho Customer
+        customer_data = {
+            'address': request.data.get('address'),
+            'phone': request.data.get('phone'),
+            'date': request.data.get('date'),
+            'employee': user.id,  # Liên kết với nhân viên hiện tại
+            'name': request.data.get('name'),
+        }
+
+        # Sử dụng transaction để đảm bảo tính toàn vẹn dữ liệu
+        with transaction.atomic():
+            # Tạo Account
+            account_serializer = AccountSerializer(data=new_account)
+            if account_serializer.is_valid():
+                account = account_serializer.save()
+                customer_data['account'] = account.id  # Liên kết Account với Customer
+
+                # Tạo Customer
+                customer_serializer = CustomerSerializer(data=customer_data)
+                if customer_serializer.is_valid():
+                    customer = customer_serializer.save()
+                    return customer_serializer.data
+                else:
+                    # Nếu Customer gặp lỗi, transaction sẽ rollback
+                    raise ValueError(customer_serializer.errors)
+            else:
+                # Nếu Account gặp lỗi, transaction sẽ rollback
+                raise ValueError(account_serializer.errors)
 
 
