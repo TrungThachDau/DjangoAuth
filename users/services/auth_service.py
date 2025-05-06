@@ -75,26 +75,19 @@ class AuthService:
 
         with transaction.atomic():
             if serializer.is_valid():
-                account = serializer.save()
-
-                
+                account = serializer.save()    
                 try:
                     role = EmployeeRole.objects.get(id=2)
                 except EmployeeRole.DoesNotExist:
-                    raise ValueError("Role with id=2 does not exist")
-
-                
+                    raise ValueError("Role with id=2 does not exist")     
                 employee_data = Employee(
                     account=account,
                     role=role,
                 )
-                employee_data.save()
-
-               
+                employee_data.save()            
                 token = self.get_token_for_user(account)
                 return token
-            else:
-                
+            else: 
                 error_messages = []
                 for field, errors in serializer.errors.items():
                     for error in errors:
