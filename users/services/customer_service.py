@@ -13,16 +13,15 @@ class CustomerService:
             return serializer.data
         else:
             raise ValueError(serializer.errors)
-    
+
     def create_new_customer(self, request):
         user = request.user
-
-        # Dữ liệu cho Account
         new_account = {
             'username': request.data.get('username'),
             'email': request.data.get('email'),
-            'password': "12345678",  # Mật khẩu mặc định (nên thay bằng mật khẩu ngẫu nhiên)
-            'hashed_password': request.data.get('hashed_password'),  # Sửa lỗi chính tả
+            'hashed_password': '123456',
+            'name': request.data.get('name'),
+            'is_authenticated': True,
         }
 
         # Dữ liệu cho Customer
@@ -30,8 +29,7 @@ class CustomerService:
             'address': request.data.get('address'),
             'phone': request.data.get('phone'),
             'date': request.data.get('date'),
-            'employee': user.id,  # Liên kết với nhân viên hiện tại
-            'name': request.data.get('name'),
+            'employee': user.id,
         }
 
         # Sử dụng transaction để đảm bảo tính toàn vẹn dữ liệu
@@ -40,15 +38,13 @@ class CustomerService:
             account_serializer = AccountSerializer(data=new_account)
             if account_serializer.is_valid():
                 account = account_serializer.save()
-                customer_data['account'] = account.id  # Liên kết Account với Customer
+                customer_data['account'] = account.id
 
-                # Tạo Customer
                 customer_serializer = CustomerSerializer(data=customer_data)
                 if customer_serializer.is_valid():
                     customer = customer_serializer.save()
                     return customer_serializer.data
                 else:
-                    # Nếu Customer gặp lỗi, transaction sẽ rollback
                     raise ValueError(customer_serializer.errors)
             else:
                 # Nếu Account gặp lỗi, transaction sẽ rollback
@@ -87,3 +83,4 @@ class CustomerService:
             return serializer.data
         else:
             raise ValueError("Customer not found")
+

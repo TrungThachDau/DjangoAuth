@@ -31,6 +31,8 @@ const AddCustomer = () => {
           phone: values.phone,
           address: values.address,
           date: dayjs(values.date).format("YYYY-MM-DD"),
+          email: values.email,
+          username: values.username,
         },
         {
           headers: { Authorization: "Bearer " + token },
@@ -41,14 +43,15 @@ const AddCustomer = () => {
     setLoading(true); 
     try {
       await submitData(sessionStorage.getItem("accessToken"));
-      messageApi.success("Customer added successfully");
+      messageApi.success("Customer added successfully. Default password is 123456. Please change it.");
     } catch (error) {
       if (error.response?.status === 401) {
         try {
           const newToken = await refreshToken();
           sessionStorage.setItem("accessToken", newToken);
           await submitData(newToken);
-          messageApi.success("Customer added successfully");
+
+          messageApi.success("Customer added successfully. Default password is 123456. Please change it.");
         } catch (refreshError) {
           messageApi.error("Failed to refresh token. Please log in again.");
           console.error("Error refreshing token:", refreshError);
@@ -62,7 +65,6 @@ const AddCustomer = () => {
       setLoading(false); 
     }
   };
-
   return (
     <>
       <NavBar />
@@ -73,8 +75,14 @@ const AddCustomer = () => {
             <Form.Item name="name">
               <Input className="signin-input" placeholder="Name" />
             </Form.Item>
+            <Form.Item name="username">
+              <Input className="signin-input" placeholder="Username" />
+            </Form.Item>
             <Form.Item name="address">
               <Input className="signin-input" placeholder="Address" />
+            </Form.Item>
+            <Form.Item name="email">
+              <Input className="signin-input" placeholder="Email" />
             </Form.Item>
             <Form.Item name="phone">
               <Input className="signin-input" placeholder="Phone" />

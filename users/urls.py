@@ -32,4 +32,7 @@ urlpatterns = [
     path('auth/sign-out/',sign_out, name='sign_out'),
 
     # path('auth/get_url_object/',get_url_object, name='get_url_object'),
+    path('auth/upload_file/',upload_file, name='upload_file'),
+    path('auth/upload_multi_file/',upload_multi_file, name='upload_multi_file'),
+    path('auth/get_all_files/',get_all_objects, name='get_all_objects'),
     ]

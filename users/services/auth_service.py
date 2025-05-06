@@ -1,17 +1,21 @@
+from datetime import datetime
+
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
+from django.core.serializers import serialize
 from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.tokens import RefreshToken, UntypedToken
 from rest_framework_simplejwt.exceptions import TokenError
-from users.models import Account
+from users.models import Account, Object
 from users.models.employee import Employee
 from users.models.employee_role import EmployeeRole
 from users.serializers.auth import SignUpSerializer
 from rest_framework_simplejwt.tokens import api_settings
 from django.core.mail import send_mail
 from django.db import transaction
-
+from .mino_service import MinioService
 from users.serializers.employee import EmployeeSerializer
+from ..serializers.object import ObjectSerializer
 
 
 class AuthService:
@@ -33,7 +37,6 @@ class AuthService:
                     'username': user.username,
                     'email': user.email,
                     'is_changed_password': user.is_changed_password,
-                    'role': user.role.id,
                 }
             else:
                 raise ValueError("Token invalid")
@@ -69,25 +72,32 @@ class AuthService:
         else:
             raise ValueError("User not found")
     def sign_up(self, request_data, **kwargs):
+        # Băm mật khẩu đúng cách
         request_data['hashed_password'] = make_password(request_data.get('password'))
         serializer = SignUpSerializer(data=request_data)
         request_data['is_staff'] = True
 
         with transaction.atomic():
             if serializer.is_valid():
-                account = serializer.save()    
+                account = serializer.save()
+
+                # Lấy đối tượng EmployeeRole
                 try:
                     role = EmployeeRole.objects.get(id=2)
                 except EmployeeRole.DoesNotExist:
-                    raise ValueError("Role with id=2 does not exist")     
+                    raise ValueError("Role with id=2 does not exist")
+
+                # Tạo Employee liên kết với Account
                 employee_data = Employee(
                     account=account,
                     role=role,
                 )
-                employee_data.save()            
+                employee_data.save()
+
+                # Tạo token cho Account
                 token = self.get_token_for_user(account)
                 return token
-            else: 
+            else:
                 error_messages = []
                 for field, errors in serializer.errors.items():
                     for error in errors:
@@ -99,14 +109,20 @@ class AuthService:
         password = request_data.get('password')
         if not username or not password:
             raise ValueError("Username and password are required")
+        
+        # Tìm người dùng theo username
         user = Account.objects.filter(username=username).first()
         if user:
+            # Kiểm tra mật khẩu
             if not check_password(password, user.hashed_password):
                 raise ValueError("Invalid password")
+            
+            # Tạo token nếu mật khẩu hợp lệ
             token = self.get_token_for_user(user)
             return token
         else:
             raise ValueError("Invalid credentials")
+
     def sign_out(self, request):
         token = request.get('refreshToken')
         if not token:
@@ -135,7 +151,6 @@ class AuthService:
                 'username': user.username,
                 'email': user.email,
                 'is_changed_password': user.is_changed_password,
-                'role': user.role.id,
             }
         else:
             raise ValueError("Invalid credentials")
@@ -181,44 +196,77 @@ class AuthService:
         else:
             raise ValueError("Invalid credentials")
 
-    def create_new_customer(self, request):
+    def upload_file(self,request):
         user = request.user
+        bucket_name = request.data['bucket_name']
+        file_path = request.data['file_path']
+        object_name = request.data['object_name']
+        extension_name = file_path.split('.')[-1].upper()
+        try:
+            minio_sv = MinioService()
 
-        # Dữ liệu cho Account
-        new_account = {
-            'username': request.data.get('username'),
-            'email': request.data.get('email'),
-            'password': "12345678",  # Mật khẩu mặc định (nên thay bằng mật khẩu ngẫu nhiên)
-            'hashed_password': request.data.get('hashed_password'),  # Sửa lỗi chính tả
-        }
+            if not minio_sv.minio_client.bucket_exists(bucket_name):
+                return False
+            res = minio_sv.upload_file(bucket_name, file_path, object_name)
+            url = "http://"+minio_sv.endpoint + "/" + bucket_name + "/" + object_name
+            
 
-        # Dữ liệu cho Customer
-        customer_data = {
-            'address': request.data.get('address'),
-            'phone': request.data.get('phone'),
-            'date': request.data.get('date'),
-            'employee': user.id,  # Liên kết với nhân viên hiện tại
-            'name': request.data.get('name'),
-        }
-
-        # Sử dụng transaction để đảm bảo tính toàn vẹn dữ liệu
-        with transaction.atomic():
-            # Tạo Account
-            account_serializer = AccountSerializer(data=new_account)
-            if account_serializer.is_valid():
-                account = account_serializer.save()
-                customer_data['account'] = account.id  # Liên kết Account với Customer
-
-                # Tạo Customer
-                customer_serializer = CustomerSerializer(data=customer_data)
-                if customer_serializer.is_valid():
-                    customer = customer_serializer.save()
-                    return customer_serializer.data
+            if res:
+                new_file = {
+                    'url': url,
+                    'name': object_name,
+                    'status':1,
+                    'create_at': datetime.now(),
+                    'update_at': datetime.now(),
+                    'account':user.id,
+                    'extension': extension_name
+                }
+                serializer_file = ObjectSerializer(data=new_file)
+                if serializer_file.is_valid():
+                    serializer_file.save()
                 else:
-                    # Nếu Customer gặp lỗi, transaction sẽ rollback
-                    raise ValueError(customer_serializer.errors)
-            else:
-                # Nếu Account gặp lỗi, transaction sẽ rollback
-                raise ValueError(account_serializer.errors)
+                    raise ValueError(serializer_file.errors)
+            return True
+        except Exception as e:
+            print(f"Error uploading file: {e}")
+            raise ValueError(f"{e}")
+    def upload_multi_file(self,request):
+        user = request.user
+        file_paths = request.data['file_paths']
+        bucket_name = request.data['bucket_name']
+        try:
+            minio_sv = MinioService()
+            res = minio_sv.upload_multi_file(bucket_name, file_paths)
+            if res:     
+                for file_path in file_paths:
+                    object_name = file_path.split('\\')[-1]
+                    new_file = {
+                        'url': "http://"+minio_sv.endpoint + "/" + bucket_name + "/" + object_name,
+                        'name': object_name,
+                        'status':1,
+                        'create_at': datetime.now(),
+                        'update_at': datetime.now(),
+                        'account':user.id,
+                        'extension': file_path.split('.')[-1].upper()
+                    }
+                    serializer_file = ObjectSerializer(data=new_file)
+                    if serializer_file.is_valid():
+                        serializer_file.save()
+                        return {
+                            'status': 'success',
+                            'message': "Upload file successfully",
+                        }
+                    else:
+                        raise ValueError(serializer_file.errors)
+        except Exception as e:
+            print(f"Error uploading files: {e}")
+            raise ValueError(f"{e}")
+    def get_object_list(self):
+        object_list = Object.objects.select_related('status').all()
 
+        serializer = ObjectSerializer(object_list, many=True)
+        if object_list.exists():
+            return serializer.data
+        else:
+            raise ValueError(serializer.errors)
 

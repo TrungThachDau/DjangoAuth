@@ -12,10 +12,20 @@ class MinioService:
             secret_key=self.secret_key,
             secure=False
         )
+    def upload_multi_file(self, bucket_name, file_paths):
+        try:
+            if not self.minio_client.bucket_exists(bucket_name):
+                print(f"Bucket {bucket_name} does not exist.")
+                return False
 
-
-
-
+            for file_path in file_paths:
+                print(file_path)
+                object_name = file_path.split("\\")[-1]
+                self.minio_client.fput_object(bucket_name, object_name, file_path)
+            return True
+        except Exception as e:
+            print(f"Error uploading files: {e}")
+            return False
     def upload_file(self, bucket_name, file_path, object_name):
         try:
             self.minio_client.fput_object(bucket_name, object_name, file_path)

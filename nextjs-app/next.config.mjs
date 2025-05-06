@@ -42,6 +42,12 @@ const nextConfig = {
         defaultLocale:"en",
         localeDetection:true,
 
+    },
+    images:{
+      domains: [
+        "localhost",
+        "172.18.20.15",
+      ],
     }
 };
 

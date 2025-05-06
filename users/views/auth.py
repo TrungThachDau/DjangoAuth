@@ -8,7 +8,7 @@ from adrf.decorators import api_view
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from users.services.auth_service import AuthService
-
+from users.services.mino_service import MinioService
 
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
@@ -54,7 +54,7 @@ async def confirm_new_password(request,token):
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
-@permission_classes([IsStaff])
+@permission_classes([AllowAny])
 async def change_password(request):
     try:
         auth_service = AuthService()
@@ -94,3 +94,35 @@ async def get_user2(request,token):
         return Response({"data":res},status=status.HTTP_200_OK)
     except ValueError as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([AllowAny])
+def upload_file(request):
+    try:
+        minio_service = AuthService()
+        res = minio_service.upload_file(request)
+        return Response({"data":res},status=status.HTTP_200_OK)
+    except ValueError as e:
+        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([AllowAny])    
+def upload_multi_file(request):
+    try:
+        auth_sv = AuthService()
+        res = auth_sv.upload_multi_file(request)
+        return Response({"data":res},status=status.HTTP_200_OK)
+    except ValueError as e:
+        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['GET'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([AllowAny])
+def get_all_objects(request):
+    try:
+        auth_sv = AuthService()
+        res = auth_sv.get_object_list()
+        return Response({"data":res},status=status.HTTP_200_OK)
+    except ValueError as e:
+        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+

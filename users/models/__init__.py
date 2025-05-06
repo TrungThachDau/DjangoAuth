@@ -4,6 +4,6 @@ from .account import Account
 from .customer import Customer
 from .role_permission import RolePermission
 from .post import Post
-from .object_urls_customer import ObjectUrlsCustomer
+from .object import Object
 from .object_status import ObjectStatus
 from .employee import Employee
