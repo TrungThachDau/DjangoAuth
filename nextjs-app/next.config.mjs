@@ -37,18 +37,12 @@ const nextConfig = {
         "rc-upload",
         "rc-util",
       ],
-    i18n:{
-        locales: ["en","vi"],
-        defaultLocale:"en",
-        localeDetection:true,
-
-    },
     images:{
       domains: [
         "localhost",
         "172.18.20.15",
       ],
-    }
+    },
 };
 
 export default nextConfig;

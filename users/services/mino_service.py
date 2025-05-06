@@ -1,6 +1,7 @@
 import self
 from minio import Minio
 from minio.error import S3Error
+from io import BytesIO
 class MinioService:
     endpoint = "172.18.20.15:9000"
     access_key = "minioadmin"
@@ -12,16 +13,21 @@ class MinioService:
             secret_key=self.secret_key,
             secure=False
         )
-    def upload_multi_file(self, bucket_name, file_paths):
+    def upload_multi_file(self, bucket_name, files):
         try:
             if not self.minio_client.bucket_exists(bucket_name):
                 print(f"Bucket {bucket_name} does not exist.")
                 return False
 
-            for file_path in file_paths:
-                print(file_path)
-                object_name = file_path.split("\\")[-1]
-                self.minio_client.fput_object(bucket_name, object_name, file_path)
+            for file in files:
+                object_name = file.name  
+                self.minio_client.put_object(
+                    bucket_name=bucket_name,
+                    object_name=object_name,
+                    data=BytesIO(file.read()), 
+                    length=file.size,  
+                    content_type=file.content_type or "application/octet-stream"
+                )
             return True
         except Exception as e:
             print(f"Error uploading files: {e}")

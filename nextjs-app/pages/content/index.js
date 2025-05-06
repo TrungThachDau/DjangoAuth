@@ -79,6 +79,14 @@ const ContentPage = () => {
         };
         fetchData();
     },[]);
+    const handleUploadChange = async (info) => {
+        if (info.file.status === "done") {
+          message.success(`${info.file.name} file uploaded successfully`);
+          setFileList(info.fileList);
+        } else if (info.file.status === "error") {
+          message.error(`${info.file.name} file upload failed.`);
+        }
+      };
     return (
         <div>
             <NavBar />
@@ -88,15 +96,7 @@ const ContentPage = () => {
               listType="picture"
               maxCount={3}
               multiple
-              onChange={(info) => {
-                console.log("File list:", info.fileList); 
-                console.log("Current file:", info.file); 
-                if (info.file.status === "done") {
-                  console.log(`${info.file.name} uploaded successfully.`);
-                } else if (info.file.status === "error") {
-                  console.log(`${info.file.name} upload failed.`);
-                }
-              }}
+              onChange={handleUploadChange}
             >
               <Button icon={<UploadOutlined />}>Upload</Button>
             </Upload>

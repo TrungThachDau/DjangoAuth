@@ -232,34 +232,36 @@ class AuthService:
         except Exception as e:
             print(f"Error uploading file: {e}")
             raise ValueError(f"{e}")
-    def upload_multi_file(self,request):
+    def upload_multi_file(self, request):
         user = request.user
-        file_paths = request.data['file_paths']
-        bucket_name = request.data['bucket_name']
+        files = request.FILES.getlist('files')  # Lấy danh sách file từ frontend
+        bucket_name = request.data.get('bucket_name')  # Lấy bucket_name từ form data
         try:
             minio_sv = MinioService()
-            res = minio_sv.upload_multi_file(bucket_name, file_paths)
-            if res:     
-                for file_path in file_paths:
-                    object_name = file_path.split('\\')[-1]
+            res = minio_sv.upload_multi_file(bucket_name, files)  # Truyền danh sách file
+            if res:
+                for file in files:
+                    object_name = file.name
                     new_file = {
-                        'url': "http://"+minio_sv.endpoint + "/" + bucket_name + "/" + object_name,
+                        'url': f"http://{minio_sv.endpoint}/{bucket_name}/{object_name}",
                         'name': object_name,
-                        'status':1,
+                        'status': 1,
                         'create_at': datetime.now(),
                         'update_at': datetime.now(),
-                        'account':user.id,
-                        'extension': file_path.split('.')[-1].upper()
+                        'account': user.id,
+                        'extension': object_name.split('.')[-1].upper() if '.' in object_name else ''
                     }
                     serializer_file = ObjectSerializer(data=new_file)
                     if serializer_file.is_valid():
                         serializer_file.save()
-                        return {
-                            'status': 'success',
-                            'message': "Upload file successfully",
-                        }
                     else:
                         raise ValueError(serializer_file.errors)
+                return {
+                    'status': 'success',
+                    'message': "Upload file successfully",
+                }
+            else:
+                raise ValueError("Failed to upload files to MinIO")
         except Exception as e:
             print(f"Error uploading files: {e}")
             raise ValueError(f"{e}")
