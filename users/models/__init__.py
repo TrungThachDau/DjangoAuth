@@ -5,5 +5,5 @@ from .customer import Customer
 from .role_permission import RolePermission
 from .post import Post
 from .object import Object
-from .object_status import ObjectStatus
+from .object_history import ObjectHistory
 from .employee import Employee

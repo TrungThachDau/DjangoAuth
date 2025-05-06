@@ -13,6 +13,8 @@ from users.serializers.auth import SignUpSerializer
 from rest_framework_simplejwt.tokens import api_settings
 from django.core.mail import send_mail
 from django.db import transaction
+
+from users.serializers.object_history import ObjectHistorySerializer
 from .mino_service import MinioService
 from users.serializers.employee import EmployeeSerializer
 from ..serializers.object import ObjectSerializer
@@ -262,11 +264,61 @@ class AuthService:
             print(f"Error uploading files: {e}")
             raise ValueError(f"{e}")
     def get_object_list(self):
-        object_list = Object.objects.select_related('status').all()
+        object_list = Object.objects.all()
 
         serializer = ObjectSerializer(object_list, many=True)
         if object_list.exists():
             return serializer.data
         else:
             raise ValueError(serializer.errors)
+
+    def update_file(self, request):
+        object_id = request.data['object_id']
+        new_file_path = request.data['new_file_path']
+        query = Object.objects.filter(id=object_id).first()
+        bucket_name = "images"
+        new_extension = new_file_path.split('.')[-1].upper()
+        print(new_extension)
+        if query:
+            object_name = query.name
+            extension_name = query.extension
+
+            if( extension_name != new_extension):
+                raise ValueError("Extension not match")
+            else:
+
+                minio_sv = MinioService()
+                res = minio_sv.upload_file(bucket_name, new_file_path, object_name)
+                if res:
+                    file_update = {
+                        'name': object_name,
+                        'status':'pending',
+                        'update_at': datetime.now(),
+                        'extension': extension_name
+                    }
+                    serializer_file = ObjectSerializer(query, data=file_update, partial=True)
+                    if serializer_file.is_valid():
+                        serializer_file.save()
+                        # Update history
+                        object_history = {
+                            'object': query.id,
+                            'changed_by': request.user.id,
+                            'field_name': 'file_path',
+                            'changed_at': datetime.now(),
+
+                        }
+                        serializer_history = ObjectHistorySerializer(data=object_history)
+                        if serializer_history.is_valid():
+                            serializer_history.save()
+                        else:
+                            raise ValueError(serializer_history.errors)
+                        return {
+                            'status': 'success',
+                            'message': "Update file successfully",
+                        }
+                    else:
+                        raise ValueError(serializer_file.errors)
+
+
+
 

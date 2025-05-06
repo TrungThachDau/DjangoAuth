@@ -1,6 +1,5 @@
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
-from .object_status import ObjectStatus
 from .account import Account
 from .object import Object
 
@@ -13,6 +12,6 @@ class ObjectHistory(models.Model):
     new_value = models.TextField(null=True, blank=True)
     changed_at = models.DateTimeField(auto_now_add=True)
     class Meta:
-        ordering = ['-changed_at']
+        ordering = ['changed_at']
 
 
