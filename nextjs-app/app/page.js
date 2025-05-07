@@ -175,7 +175,19 @@ export default function Home() {
   return (
     <div>
             <div>
-            <Table columns={columns} dataSource={datax.map((item, index) => ({ ...item, key: index }))} />
+            <Table 
+            columns={columns} 
+            dataSource={datax.map((item, index) => ({ ...item, key: index }))} 
+            onRow={(record => {
+              return {
+                onClick: event => {
+                  console.log(record);
+                },
+              };
+
+            }
+            )}
+            />
             </div>
     </div>
   )

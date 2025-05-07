@@ -1,4 +1,3 @@
-import self
 from minio import Minio
 from minio.error import S3Error
 from io import BytesIO
