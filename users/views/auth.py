@@ -18,9 +18,11 @@ async def sign_in(request):
         auth_service = AuthService()
         token = await sync_to_async(auth_service.sign_in)(request.data)
         user = await sync_to_async(auth_service.get_user)(request.data)
-        return Response({"status": "success", "message": "Login successful", "data": token, "user":user}, status=status.HTTP_200_OK)
+        return Response({"message": "Login successful", "data": token, "user":user}, status=status.HTTP_200_OK)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
@@ -29,9 +31,11 @@ async def sign_up(request):
         auth_service = AuthService()
         token = await sync_to_async(auth_service.sign_up)(request.data)
         user = await sync_to_async(auth_service.get_user)(request.data)
-        return Response({"status": "success", "message": "User created successfully","data":token,"user":user}, status=status.HTTP_201_CREATED)
+        return Response({"message": "User created successfully","data":token,"user":user}, status=status.HTTP_201_CREATED)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
@@ -39,9 +43,11 @@ async def reset_password(request):
     try:
         auth_service = AuthService()
         token = await sync_to_async(auth_service.reset_password)(request.data)
-        return Response({"status": "success", "message": "Email sent successfully", "data":token},status=status.HTTP_200_OK)
+        return Response({"message": "Email sent successfully", "data":token},status=status.HTTP_200_OK)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
@@ -49,9 +55,11 @@ async def confirm_new_password(request,token):
     try:
         auth_service = AuthService()
         await sync_to_async(auth_service.confirm_new_password)(request.data,token)
-        return Response({"status": "success", "message": "User update successfully"}, status=status.HTTP_201_CREATED)
+        return Response({"message": "User update successfully"}, status=status.HTTP_201_CREATED)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
@@ -59,9 +67,12 @@ async def change_password(request):
     try:
         auth_service = AuthService()
         await sync_to_async(auth_service.change_password)(request.data)
-        return Response({"status": "success", "message": "User updated successfully"}, status=status.HTTP_201_CREATED)
+        return Response({"message": "User updated successfully"}, status=status.HTTP_201_CREATED)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
@@ -71,7 +82,9 @@ async def sign_out(request):
         await sync_to_async(auth_service.sign_out)(request.data)
         return Response({"status":"success"},status=status.HTTP_200_OK)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
@@ -82,7 +95,9 @@ async def get_user(request):
         res =  await sync_to_async(auth_service.get_user)(request)
         return Response({"data":res},status=status.HTTP_200_OK)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
 @authentication_classes([BasicAuthentication])
@@ -93,7 +108,9 @@ async def get_user2(request,token):
         res =  await sync_to_async(auth_service.get_user2)(request,token)
         return Response({"data":res},status=status.HTTP_200_OK)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
@@ -103,7 +120,9 @@ def upload_file(request):
         res = minio_service.upload_file(request)
         return Response({"data":res},status=status.HTTP_200_OK)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])    
@@ -111,9 +130,12 @@ def upload_multi_file(request):
     try:
         auth_sv = AuthService()
         res = auth_sv.upload_multi_file(request)
-        return Response({"data":res},status=status.HTTP_200_OK)
+        return Response({"message":"Upload successful"},status=status.HTTP_200_OK)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 @api_view(['GET'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
@@ -121,9 +143,11 @@ def get_all_objects(request):
     try:
         auth_sv = AuthService()
         res = auth_sv.get_object_list()
-        return Response({"data":res},status=status.HTTP_200_OK)
+        return Response({"message":"Upload successful"},status=status.HTTP_200_OK)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
@@ -132,9 +156,11 @@ def update_file(request):
     try:
         auth_sv = AuthService()
         res = auth_sv.update_file(request)
-        return Response({"data":res},status=status.HTTP_200_OK)
+        return Response({"message":"Update successful"},status=status.HTTP_200_OK)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
@@ -143,6 +169,8 @@ def delete_file(request):
     try:
         auth_sv = AuthService()
         res = auth_sv.delete_file(request)
-        return Response({"data":res},status=status.HTTP_200_OK)
+        return Response({"message":"Delete successful"},status=status.HTTP_200_OK)
     except ValueError as e:
-        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

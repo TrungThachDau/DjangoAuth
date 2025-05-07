@@ -21,3 +21,5 @@ def resize_image(image_bytes):
     resized_image_bytes.seek(0)  # Đặt lại con trỏ về đầu stream
 
     return resized_image_bytes
+
+

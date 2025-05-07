@@ -225,7 +225,7 @@ class AuthService:
                     serializer_file.save()
                 else:
                     raise ValueError(serializer_file.errors)
-            return True
+                return True
         except Exception as e:
             print(f"Error uploading file: {e}")
             raise ValueError(f"{e}")
@@ -235,12 +235,12 @@ class AuthService:
         bucket_name = request.data.get('bucket_name')
         try:
             minio_sv = MinioService()
-            res = minio_sv.upload_multi_file(bucket_name, files)
-            if not res:
-                raise ValueError("Failed to upload files to MinIO")
+            if minio_sv.upload_multi_file(bucket_name, files) is False:
+                raise ValueError()
+
             with transaction.atomic():
                 for file in files:
-                    object_name = file.name
+                    object_name = file.name                
                     new_file = {
                         'thumbnail_url': f"http://{minio_sv.endpoint}/{bucket_name}/thumbnail/{object_name}",
                         'url': f"http://{minio_sv.endpoint}/{bucket_name}/{object_name}",
@@ -256,16 +256,9 @@ class AuthService:
                         serializer_file.save()
                     else:
                         raise ValueError(serializer_file.errors)
-            return {
-                'status': 'success',
-                'message': "Upload files successfully",
-            }
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-            return {
-                'status': 'error',
-                'message': f"Unexpected error: {e}",
-            }
+            return True
+        except ValueError as ve:
+            raise ValueError(f"{ve}")
     def get_object_list(self):
         object_list = Object.objects.all()
 
@@ -278,73 +271,68 @@ class AuthService:
     def update_file(self, request):
         object_id = request.data['object_id']
         file = request.FILES.get('file')
-        thumbnail = r
-        query = Object.objects.filter(id=object_id).first()
+        
         bucket_name = "images"
         new_extension = file.name.split('.')[-1].upper()
-        print(new_extension)
-        if query:
-            object_name = query.name
-            extension_name = query.extension
+        try:
+            query = Object.objects.filter(id=object_id).first()
+            if query:
+                object_name = query.name
+                extension_name = query.extension
 
-            if( extension_name != new_extension):
-                raise ValueError("Extension not match")
+                if( extension_name != new_extension):
+                    raise ValueError("Extension not match")
+                else:
+
+                    minio_sv = MinioService()
+                    res = minio_sv.upload_file(bucket_name, file, object_name)
+                    if res:
+                        file_update = {
+                            'name': object_name,
+                            'status':'pending',
+                            'update_at': datetime.now(),
+                            'extension': extension_name
+                        }
+                        serializer_file = ObjectSerializer(query, data=file_update, partial=True)
+                        if serializer_file.is_valid():
+                            serializer_file.save()
+                            object_history = {
+                                'object': query.id,
+                                'changed_by': request.user.id,
+                                'field_name': 'file_path',
+                                'changed_at': datetime.now(),
+
+                            }
+                            serializer_history = ObjectHistorySerializer(data=object_history)
+                            if serializer_history.is_valid():
+                                serializer_history.save()
+                            else:
+                                raise ValueError(serializer_history.errors)
+                            return True
             else:
-
-                minio_sv = MinioService()
-                res = minio_sv.upload_file(bucket_name, file, object_name)
-                if res:
-                    file_update = {
-                        'name': object_name,
-                        'status':'pending',
-                        'update_at': datetime.now(),
-                        'extension': extension_name
-                    }
-                    serializer_file = ObjectSerializer(query, data=file_update, partial=True)
-                    if serializer_file.is_valid():
-                        serializer_file.save()
-                        object_history = {
-                            'object': query.id,
-                            'changed_by': request.user.id,
-                            'field_name': 'file_path',
-                            'changed_at': datetime.now(),
-
-                        }
-                        serializer_history = ObjectHistorySerializer(data=object_history)
-                        if serializer_history.is_valid():
-                            serializer_history.save()
-                        else:
-                            raise ValueError(serializer_history.errors)
-                        return {
-                            'status': 'success',
-                            'message': "Update file successfully",
-                        }
-                    else:
-                        raise ValueError(serializer_file.errors)
-
+                raise ValueError("File not found")
+        except ValueError as ve:
+            raise ValueError(f"{ve}")
 
     def delete_file(self, request):
         object_id = request.data['object_id']
         bucket_name = "images"
         object = Object.objects.filter(id=object_id).first()
-        try:
-            if object:
-                file_delete = {
-                    'is_deleted':True
-                }
-                serializer_file = ObjectSerializer(data=file_delete)
-                if serializer_file.is_valid():
-                    serializer_file.save()
-                    #Delete in Bucket
-                    minio_sv = MinioService()
-                    minio_sv.minio_client.delete_object_tags(bucket_name=bucket_name, object_name=object.name)
-
-                    return {
-                        'status': 'success',
-                        'message': "Update file successfully",
-                    }
-        except ValueError as ve:
-            raise ValueError(f"{ve}")
+        if object:
+            file_delete = {
+                'is_deleted':True
+            }
+            serializer_file = ObjectSerializer(data=file_delete)
+            if serializer_file.is_valid():
+                serializer_file.save()
+                #Delete in Bucket
+                minio_sv = MinioService()
+                minio_sv.minio_client.delete_object_tags(bucket_name=bucket_name, object_name=object.name)
+                return True
+            else:
+                raise ValueError(serializer_file.errors)
+        else:
+            raise ValueError("File not found")
 
 
 
