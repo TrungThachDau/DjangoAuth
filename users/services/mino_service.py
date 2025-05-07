@@ -2,6 +2,7 @@ import self
 from minio import Minio
 from minio.error import S3Error
 from io import BytesIO
+from ..utils.resize import resize_image
 class MinioService:
     endpoint = "172.18.20.15:9000"
     access_key = "minioadmin"
@@ -18,13 +19,13 @@ class MinioService:
             if not self.minio_client.bucket_exists(bucket_name):
                 print(f"Bucket {bucket_name} does not exist.")
                 return False
-
             for file in files:
-                object_name = file.name  
+                object_name = file.name
+                byte_object = BytesIO(file.read())
                 self.minio_client.put_object(
                     bucket_name=bucket_name,
                     object_name=object_name,
-                    data=BytesIO(file.read()), 
+                    data=byte_object, 
                     length=file.size,  
                     content_type=file.content_type or "application/octet-stream"
                 )
@@ -32,9 +33,35 @@ class MinioService:
         except Exception as e:
             print(f"Error uploading files: {e}")
             return False
-    def upload_file(self, bucket_name, file_path, object_name):
+    def upload_multi_file_with_resize(self, bucket_name, files):
         try:
-            self.minio_client.fput_object(bucket_name, object_name, file_path)
+            if not self.minio_client.bucket_exists(bucket_name):
+                print(f"Bucket {bucket_name} does not exist.")
+                return False
+            for file in files:
+                object_name_resized = "(resized) "+file.name
+                byte_object = BytesIO(file.read())
+                resized_object = resize_image(byte_object)
+                self.minio_client.put_object(
+                    bucket_name=bucket_name,
+                    object_name=object_name_resized,
+                    data=resize_image(byte_object),
+                    length=resized_object.getbuffer().nbytes,
+                    content_type=file.content_type or "application/octet-stream"
+                )
+            return True
+        except Exception as e:
+            print(f"Error uploading files: {e}")
+            return False
+    def upload_file(self, bucket_name, file, object_name):
+        try:
+            self.minio_client.put_object(
+                bucket_name=bucket_name,
+                object_name=object_name,
+                data=BytesIO(file.read()),
+                length=file.size,
+                content_type=file.content_type or "application/octet-stream"
+            )
             return True
         except Exception as e:
             print(f"Error uploading file: {e}")

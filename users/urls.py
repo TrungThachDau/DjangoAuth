@@ -1,6 +1,7 @@
 
 from django.urls import path,include
 from .views.auth import *
+from .views.public import get_all_objects as get_all_objects_public
 from .views.customer import CustomerView, CustomerDetailView
 from .views.employee import EmployeeView
 from .views.employee_role import EmployeeRoleView
@@ -36,4 +37,9 @@ urlpatterns = [
     path('auth/upload_multi_file/',upload_multi_file, name='upload_multi_file'),
     path('auth/get_all_files/',get_all_objects, name='get_all_objects'),
     path('auth/update_file/',update_file, name='update_file'),
+
+    path('auth/delete_file/',delete_file, name='delete_file'),
+
+
+    path('get_all_files/', get_all_objects_public, name='get_all_objects'),
     ]

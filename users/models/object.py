@@ -9,7 +9,7 @@ class ObjectStatus(models.TextChoices):
 
 class Object(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True,unique=True)
     url = models.TextField(null=True, blank=True)
     status = models.CharField(
         max_length=10,
@@ -18,11 +18,14 @@ class Object(models.Model):
         blank=True,
         null=True
     )
+    thumbnail_url = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     account = models.ForeignKey('users.Account', on_delete=models.CASCADE, blank=True, null=True)
     extension = models.CharField(max_length=10, null=True, blank=True)
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
+
 

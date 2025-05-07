@@ -1,23 +1,13 @@
 import {React, useEffect, useState} from 'react';
 import NavBar from "@/components/nav_bar";
 import Link  from "next/link";
-import {Button, Modal, Space, Table, message, Form, Upload} from "antd";
+import {Button, Modal, Space, Table, Upload, message} from "antd";
 import { UploadOutlined } from '@ant-design/icons';
-import Image from 'next/image';
 import axiosInstance from "@/axios.js";
-
 const ContentPage = () => {
+    const [messageApi, contextHolder] = message.useMessage();
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState([]);
-    const [fileList, setFileList] = useState([
-      {
-        uid: '-1',
-        name: 'xxx.png',
-        status: 'done',
-        url: 'http://www.baidu.com/xxx.png',
-      },
-    ]);
-
     const columns = [
         {
             title: "Name",
@@ -44,7 +34,6 @@ const ContentPage = () => {
             title: "Status",
             key: "status",
             dataIndex: "status",
-            render: (status) => <span>{status.status || status}</span>,
         },
         {
             title: "Action",
@@ -61,44 +50,60 @@ const ContentPage = () => {
             ),
         },
     ];
-    useEffect(()=>{
-        const fetchData = async () => {
-          try {
+    const fetchData = async () => {
+        try {
             setLoading(true);
             const response = await axiosInstance.get("auth/get_all_files/", {
-              headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
+                headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
             });
             setData(response.data.data);
             console.log(response.data.data);
-            //localStorage.setItem("customerData", JSON.stringify(response.data));
-          } catch (error) {
+        } catch (error) {
             console.log(error);
-          } finally {
+        } finally {
             setLoading(false);
-          }
-        };
-        fetchData();
-    },[]);
-    const handleUploadChange = async (info) => {
-        if (info.file.status === "done") {
-          message.success(`${info.file.name} file uploaded successfully`);
-          setFileList(info.fileList);
-        } else if (info.file.status === "error") {
-          message.error(`${info.file.name} file upload failed.`);
         }
-      };
+    }
+    useEffect(()=>{
+        fetchData().then(r =>
+        console.log("Data fetched successfully")
+        ).catch(e => {
+            console.log("Error fetching data", e)
+        });
+    },[]);
+    const handleUploadChange = async ({ file, fileList }) => {
+        const formData = new FormData();
+        fileList.forEach((file) => {
+            formData.append("files", file.originFileObj);
+        });
+        formData.append("bucket_name", "images");
+
+        try {
+            const response = await axiosInstance.post("auth/upload_multi_file/", formData, {
+                headers: {
+                    Authorization: "Bearer " + sessionStorage.getItem("accessToken"),
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            message.success(`$file uploaded successfully`);
+            fetchData();
+
+        } catch (error) {
+            
+            message.error(`${info.file.name} file upload failed.`);
+        }
+    };
     return (
         <div>
             <NavBar />
             <div style={{ padding: "30px" }}>
-            <Upload
-              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
-              listType="picture"
-              maxCount={3}
-              multiple
-              onChange={handleUploadChange}
+            <Upload 
+                onChange={handleUploadChange} // Use onChange instead of customRequest
+                listType="picture"
+                maxCount={3}
+                multiple
             >
-              <Button icon={<UploadOutlined />}>Upload</Button>
+                <Button icon={<UploadOutlined />}>Upload</Button>
             </Upload>
                 <Table dataSource={data} columns={columns} rowKey="id" loading={loading} />
             </div>

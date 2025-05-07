@@ -12,7 +12,7 @@ class CustomerService:
         if customer_list:
             return serializer.data
         else:
-            raise ValueError(serializer.errors)
+            return []
 
     def create_new_customer(self, request):
         user = request.user

@@ -9,6 +9,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from users.models import Account, Object
 from users.models.employee import Employee
 from users.models.employee_role import EmployeeRole
+from users.models.object import ObjectStatus
 from users.serializers.auth import SignUpSerializer
 from rest_framework_simplejwt.tokens import api_settings
 from django.core.mail import send_mail
@@ -18,7 +19,7 @@ from users.serializers.object_history import ObjectHistorySerializer
 from .mino_service import MinioService
 from users.serializers.employee import EmployeeSerializer
 from ..serializers.object import ObjectSerializer
-
+from ..utils.resize import resize_image
 
 class AuthService:
     def get_token_for_user(self,user):
@@ -74,7 +75,6 @@ class AuthService:
         else:
             raise ValueError("User not found")
     def sign_up(self, request_data, **kwargs):
-        # Băm mật khẩu đúng cách
         request_data['hashed_password'] = make_password(request_data.get('password'))
         serializer = SignUpSerializer(data=request_data)
         request_data['is_staff'] = True
@@ -111,15 +111,12 @@ class AuthService:
         password = request_data.get('password')
         if not username or not password:
             raise ValueError("Username and password are required")
-        
-        # Tìm người dùng theo username
+    
         user = Account.objects.filter(username=username).first()
         if user:
-            # Kiểm tra mật khẩu
-            if not check_password(password, user.hashed_password):
+            is_password_valid = check_password(password, user.hashed_password)
+            if not is_password_valid:
                 raise ValueError("Invalid password")
-            
-            # Tạo token nếu mật khẩu hợp lệ
             token = self.get_token_for_user(user)
             return token
         else:
@@ -234,20 +231,23 @@ class AuthService:
             raise ValueError(f"{e}")
     def upload_multi_file(self, request):
         user = request.user
-        files = request.FILES.getlist('files')  # Lấy danh sách file từ frontend
-        bucket_name = request.data.get('bucket_name')  # Lấy bucket_name từ form data
+        files = request.FILES.getlist('files') 
+        bucket_name = request.data.get('bucket_name')
         try:
             minio_sv = MinioService()
-            res = minio_sv.upload_multi_file(bucket_name, files)  # Truyền danh sách file
-            if res:
+            res = minio_sv.upload_multi_file(bucket_name, files)
+            if not res:
+                raise ValueError("Failed to upload files to MinIO")
+            with transaction.atomic():
                 for file in files:
                     object_name = file.name
                     new_file = {
+                        'thumbnail_url': f"http://{minio_sv.endpoint}/{bucket_name}/thumbnail/{object_name}",
                         'url': f"http://{minio_sv.endpoint}/{bucket_name}/{object_name}",
                         'name': object_name,
-                        'status': 1,
-                        'create_at': datetime.now(),
-                        'update_at': datetime.now(),
+                        'status': ObjectStatus.PENDING,
+                        'created_at': datetime.now(),
+                        'updated_at': datetime.now(),
                         'account': user.id,
                         'extension': object_name.split('.')[-1].upper() if '.' in object_name else ''
                     }
@@ -256,15 +256,16 @@ class AuthService:
                         serializer_file.save()
                     else:
                         raise ValueError(serializer_file.errors)
-                return {
-                    'status': 'success',
-                    'message': "Upload file successfully",
-                }
-            else:
-                raise ValueError("Failed to upload files to MinIO")
+            return {
+                'status': 'success',
+                'message': "Upload files successfully",
+            }
         except Exception as e:
-            print(f"Error uploading files: {e}")
-            raise ValueError(f"{e}")
+            print(f"Unexpected error: {e}")
+            return {
+                'status': 'error',
+                'message': f"Unexpected error: {e}",
+            }
     def get_object_list(self):
         object_list = Object.objects.all()
 
@@ -272,14 +273,15 @@ class AuthService:
         if object_list.exists():
             return serializer.data
         else:
-            raise ValueError(serializer.errors)
+            return []
 
     def update_file(self, request):
         object_id = request.data['object_id']
-        new_file_path = request.data['new_file_path']
+        file = request.FILES.get('file')
+        thumbnail = r
         query = Object.objects.filter(id=object_id).first()
         bucket_name = "images"
-        new_extension = new_file_path.split('.')[-1].upper()
+        new_extension = file.name.split('.')[-1].upper()
         print(new_extension)
         if query:
             object_name = query.name
@@ -290,7 +292,7 @@ class AuthService:
             else:
 
                 minio_sv = MinioService()
-                res = minio_sv.upload_file(bucket_name, new_file_path, object_name)
+                res = minio_sv.upload_file(bucket_name, file, object_name)
                 if res:
                     file_update = {
                         'name': object_name,
@@ -301,7 +303,6 @@ class AuthService:
                     serializer_file = ObjectSerializer(query, data=file_update, partial=True)
                     if serializer_file.is_valid():
                         serializer_file.save()
-                        # Update history
                         object_history = {
                             'object': query.id,
                             'changed_by': request.user.id,
@@ -320,6 +321,37 @@ class AuthService:
                         }
                     else:
                         raise ValueError(serializer_file.errors)
+
+
+    def delete_file(self, request):
+        object_id = request.data['object_id']
+        bucket_name = "images"
+        object = Object.objects.filter(id=object_id).first()
+        try:
+            if object:
+                file_delete = {
+                    'is_deleted':True
+                }
+                serializer_file = ObjectSerializer(data=file_delete)
+                if serializer_file.is_valid():
+                    serializer_file.save()
+                    #Delete in Bucket
+                    minio_sv = MinioService()
+                    minio_sv.minio_client.delete_object_tags(bucket_name=bucket_name, object_name=object.name)
+
+                    return {
+                        'status': 'success',
+                        'message': "Update file successfully",
+                    }
+        except ValueError as ve:
+            raise ValueError(f"{ve}")
+
+
+
+
+
+
+
 
 
 

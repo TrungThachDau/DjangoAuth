@@ -136,3 +136,13 @@ def update_file(request):
     except ValueError as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([AllowAny])
+def delete_file(request):
+    try:
+        auth_sv = AuthService()
+        res = auth_sv.delete_file(request)
+        return Response({"data":res},status=status.HTTP_200_OK)
+    except ValueError as e:
+        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

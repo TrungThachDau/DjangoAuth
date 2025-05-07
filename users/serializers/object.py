@@ -5,7 +5,8 @@ from users.models.object import Object
 class ObjectSerializer(ModelSerializer):
     class Meta:
         model = Object
-        fields = ('id', 'name', 'url', 'status', 'created_at', 'account', 'extension')
+        
+        fields = '__all__'
         read_only_fields = ('id',)
         extra_kwargs = {
             'name': {
@@ -18,4 +19,6 @@ class ObjectSerializer(ModelSerializer):
             'account': {'required': False},
             'extension': {'required': False},
         }
+        def __str__(self):
+            return self.name
         
