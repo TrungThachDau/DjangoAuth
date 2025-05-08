@@ -13,7 +13,6 @@ from users.services.mino_service import MinioService
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
-@custom_permission_classes(["IsStaff"])
 async def sign_in(request):
     try:
         auth_service = AuthService()
@@ -145,7 +144,7 @@ def get_all_objects(request):
     try:
         auth_sv = AuthService()
         res = auth_sv.get_object_list()
-        return Response({"message":"Upload successful"},status=status.HTTP_200_OK)
+        return Response({"data":res},status=status.HTTP_200_OK)
     except ValueError as e:
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:

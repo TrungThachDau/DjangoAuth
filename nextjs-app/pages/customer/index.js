@@ -128,31 +128,27 @@ const Customer = () => {
       const isRetrying = sessionStorage.getItem("isRetrying");
 
       if (error.response?.status === 400 || error.response?.status === 403) {
-        // Lỗi 400 hoặc 403: Đăng xuất ngay lập tức
         sessionStorage.clear();
         await router.push("/auth/sign-in");
       } else if (error.response?.status === 401) {
-        // Lỗi 401: Chỉ thử lại một lần
         if (!isRetrying) {
           try {
-            sessionStorage.setItem("isRetrying", "true"); // Đánh dấu đã thử lại
+            sessionStorage.setItem("isRetrying", "true"); 
             const newToken = await refreshToken();
             sessionStorage.setItem("accessToken", newToken);
-            await retryFunction(); // Thử lại hàm ban đầu
+            await retryFunction(); 
           } catch (refreshError) {
             sessionStorage.clear();
             await router.push("/auth/sign-in");
             console.error("Error refreshing token:", refreshError);
           } finally {
-            sessionStorage.removeItem("isRetrying"); // Xóa trạng thái thử lại
+            sessionStorage.removeItem("isRetrying");
           }
         } else {
-          // Nếu đã thử lại mà vẫn lỗi, đăng xuất
           sessionStorage.clear();
           await router.push("/auth/sign-in");
         }
       } else {
-        // Các lỗi khác: Hiển thị thông báo lỗi
         messageApi.error(error.response?.data?.message || "An error occurred");
         console.error("Error:", error);
       }

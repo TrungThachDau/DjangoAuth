@@ -162,7 +162,9 @@ export default function Home() {
       const fetchCustomerData = async () => {
         try {
           //setLoading(true);
-          const response = await axiosInstance.get("get_all_files/",);
+          const response = await axiosInstance.get("get_all_files/",{
+              
+          });
           setData(response.data.data);
         } catch (error) {
           //await handleApiError(error, fetchCustomerData);
