@@ -6,13 +6,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from adrf.decorators import api_view
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from ..decorators.permission import custom_permission_classes
 from users.services.auth_service import AuthService
 from users.services.mino_service import MinioService
 
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
+@custom_permission_classes(["IsStaff"])
 async def sign_in(request):
     try:
         auth_service = AuthService()
@@ -124,8 +125,9 @@ def upload_file(request):
     except Exception as e:
         return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
-@authentication_classes([BasicAuthentication])
-@permission_classes([AllowAny])    
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+@custom_permission_classes(["IsStaff"])
 def upload_multi_file(request):
     try:
         auth_sv = AuthService()

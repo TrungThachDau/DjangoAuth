@@ -108,6 +108,7 @@ const ContentPage = () => {
                 <Table dataSource={data} columns={columns} rowKey="id" loading={loading} />
             </div>
         </div>
+        
   );
 }
 
