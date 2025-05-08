@@ -1,12 +1,13 @@
-"use cache"
-import NavBar from "@/components/nav_bar";
+"use cache";
+"use client";
+import NavBar from "@/components/nav_bar.js";
 import { Button, DatePicker, Form, Input, message } from "antd";
 import axiosInstance from "@/axios.js";
 import dayjs from "dayjs";
-import { refreshToken } from "@/services/authentication";
+import { refreshToken } from "@/services/authentication.js";
 import { useState } from "react";
-import { useRouter } from "next/router";
-import './styles.css';
+import { useRouter } from "next/navigation";
+import './page.css';
 const AddCustomer = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);

@@ -18,6 +18,9 @@ async def sign_in(request):
         auth_service = AuthService()
         token = await sync_to_async(auth_service.sign_in)(request.data)
         user = await sync_to_async(auth_service.get_user)(request.data)
+        response = Response({"message": "Login successful", "data": token, "user":user}, status=status.HTTP_200_OK)
+        response.set_cookie(key='jwt', value=token, httponly=True, secure=True, samesite='None')
+        response.set_cookie(key='user', value=user, httponly=True, secure=True, samesite='None')
         return Response({"message": "Login successful", "data": token, "user":user}, status=status.HTTP_200_OK)
     except ValueError as e:
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

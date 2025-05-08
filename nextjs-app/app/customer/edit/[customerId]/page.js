@@ -1,10 +1,11 @@
-import NavBar from "@/components/nav_bar";
+"use client";
+import NavBar from "@/components/nav_bar.js";
 import axiosInstance from "@/axios.js";
 import { useEffect, useState } from "react";
 import {Button, DatePicker, Form, Input, message} from "antd";
-import './styles.css';
+import './page.css';
 import dayjs from 'dayjs';
-import { useRouter } from "next/router.js";
+import { useRouter } from "next/navigation";
 const UpdateCustomer = () => {
     const { customerId } = useRouter().query;
     const [customer, setCustomer] = useState([{ }]);

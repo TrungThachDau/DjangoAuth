@@ -1,14 +1,16 @@
+"use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import axiosInstance from "@/axios";
-import NavBar from "@/components/nav_bar";
+import {useParams, useRouter} from "next/navigation";
+import axiosInstance from "@/axios.js";
+import NavBar from "@/components/nav_bar.js";
 import { message, Spin } from "antd";
-import "./styles.css";
-import { refreshToken } from "@/services/authentication";
-import { useParams } from "next/navigation";
+import "./page.css";
+import { refreshToken } from "@/services/authentication.js";
+
 
 const Detail = () => {
-  const { customerId } = useRouter().query;
+  const params = useParams();
+  const { customerId } = params;
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();

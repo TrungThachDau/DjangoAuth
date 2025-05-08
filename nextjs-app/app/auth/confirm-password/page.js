@@ -1,11 +1,12 @@
-import "./styles.css";
+
+import "./page.css";
 import { Button, Input, Form, message } from "antd";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import axiosInstance from "@/axios";
-import NavBar from "@/components/nav_bar";
+import axiosInstance from "@/axios.js";
+import NavBar from "@/components/nav_bar.js";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function ConfirmPassword() {
   const [messageApi, contextHolder] = message.useMessage();

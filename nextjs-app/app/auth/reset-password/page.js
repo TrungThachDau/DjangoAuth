@@ -1,7 +1,8 @@
-import "./styles.css";
+"use client";
+import "./page.css";
 import { Button, Input, Form, message } from "antd";
-import axiosInstance from "../../../axios";
-import NavBar from "../../../components/nav_bar";
+import axiosInstance from "../../../axios.js";
+import NavBar from "../../../components/nav_bar.js";
 import { useState } from "react";
 import Link from "next/link";
 

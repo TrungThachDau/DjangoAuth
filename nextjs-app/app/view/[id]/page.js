@@ -1,11 +1,10 @@
-import ViewBar from "@/components/view_bar";
-import { useRouter } from "next/router";
-
-
-
+"use client";
+import ViewBar from "@/components/view_bar.js";
+import {useParams} from "next/navigation";
 
 const ViewPage = () => {
-    const { id } = useRouter().query;
+    const params = useParams();
+    const { id } = params;
     return (
         <div>
             <ViewBar />

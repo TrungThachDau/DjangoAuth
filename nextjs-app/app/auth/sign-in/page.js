@@ -1,9 +1,10 @@
+"use client";
 import { signIn } from "@/services/authentication";
 import { Button, Form, Input, message, Modal, Spin } from "antd";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import "./sign_in.css";
+import "./page.css";
 
 export default function SignIn() {
   const [messageApi, contextHolder] = message.useMessage();

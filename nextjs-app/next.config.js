@@ -43,6 +43,10 @@ const nextConfig = {
         "172.18.20.15",
       ],
     },
+  experimental:{
+    serverActions: {},
+  },
+  reactStrictMode: true,
 };
 
 export default nextConfig;

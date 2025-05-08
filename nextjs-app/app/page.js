@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Input, Space, Table, Tag } from 'antd';
 import Highlighter from 'react-highlight-words';
+import '@ant-design/v5-patch-for-react-19';
 import styles from "./page.module.css";
 import dayjs from 'dayjs';
 import axiosInstance from "@/axios.js";

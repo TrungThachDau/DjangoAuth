@@ -1,9 +1,10 @@
-import axiosInstance from '@/axios';
-import NavBar from "@/components/nav_bar";
+"use client";
+import axiosInstance from '@/axios.js';
+import NavBar from "@/components/nav_bar.js";
 import { Button, Form, Input, message } from 'antd';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import './styles.css';
+import './page.css';
 
 export default function ChangePassword() {
   const [messageApi, contextHolder] = message.useMessage();

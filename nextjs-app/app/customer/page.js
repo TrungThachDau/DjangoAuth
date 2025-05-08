@@ -1,9 +1,10 @@
+"use client";
 import React, { useEffect, useState } from "react";
-import NavBar from "@/components/nav_bar";
+import NavBar from "@/components/nav_bar.js";
 import { Button, Modal, Space, Table, message } from "antd";
 import axiosInstance from "@/axios.js";
 import Link  from "next/link";
-import {refreshToken} from "@/services/authentication";
+import {refreshToken} from "@/services/authentication.js";
 import {router} from "next/client";
 
 const Customer = () => {
@@ -75,7 +76,7 @@ const Customer = () => {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      render: (text, record) => <Link href={`/customer/${record.id}`}>{text}</Link>,
+      render: (text, record) => <Link href={`/app/customer/${record.id}`}>{text}</Link>,
     },
     {
       title: "Phone",
@@ -101,7 +102,7 @@ const Customer = () => {
             Delete
           </Button>
           <Button type="primary">
-            <Link href={`/customer/edit/${record.id}`}>Edit</Link>
+            <Link href={`/app/customer/edit/${record.id}`}>Edit</Link>
           </Button>
         </Space>
       ),

@@ -1,12 +1,13 @@
+"use client";
 import { Button, Form, Input, message } from "antd";
 import Link from "next/link";
 import axiosInstance from "../../../axios.js";
-import "./sign_up.css";
+import "./page.css";
 
-export default async function SignUp() {
+export default function SignUp() {
   const [messageApi, contextHolder] = message.useMessage();
 
-  const onSubmitLogin = async (values) => {
+  const onSubmitLogin = (values) => {
     if (!values.name || !values.username || !values.email || !values.password || !values.retypePassword) {
       return messageApi.error("Please fill in all fields").then(r => console.log(r));
     }
@@ -14,7 +15,7 @@ export default async function SignUp() {
     if (values.password !== values.retypePassword) {
       return messageApi.error("Passwords do not match").then(r => console.log(r));
     }
-    await axiosInstance
+    axiosInstance
       .post("/auth/signup/", {
         username: values.username,
         hashed_password: values.password,
