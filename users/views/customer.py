@@ -5,6 +5,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from DjangoProject2.authentication import CookieJWTAuthentication
 from users.services.customer_service import CustomerService
 class CustomerView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -36,7 +37,7 @@ class CustomerDetailView(APIView):
     async def get(self, request, pk):
         try:
             customer_sv = CustomerService()
-            response = await sync_to_async(customer_sv.get_customer_detail)(request, pk)
+            response = await sync_to_async(customer_sv.get_customer_detail)(+request, pk)
             return Response(response, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

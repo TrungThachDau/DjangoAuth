@@ -5,14 +5,15 @@ import { Button, Modal, Space, Table, message } from "antd";
 import axiosInstance from "@/axios.js";
 import Link  from "next/link";
 import {refreshToken} from "@/services/authentication.js";
-import {router} from "next/client";
-
+import { useRouter } from "next/navigation";
+import '@ant-design/v5-patch-for-react-19';
 const Customer = () => {
   const [data, setData] = useState([]);
   const [customerId, setCustomerId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
+    const router = useRouter();
   const showModal = (id) => {
     setCustomerId(id);
     setIsModalOpen(true);
@@ -113,7 +114,7 @@ const Customer = () => {
     const fetchCustomerData = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get("customer/", {
+        const response = await axiosInstance.get("customer/",{
           headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
         });
         setData(response.data);
@@ -162,7 +163,7 @@ const Customer = () => {
     <div>
       <NavBar />
       <div style={{ padding: "30px" }}>
-        <Link href="/customer/add">
+        <Link href="customer/add/">
           <Button type="primary" style={{ marginBottom: "20px" }}>
             Add Customer
           </Button>

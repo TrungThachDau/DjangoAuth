@@ -8,7 +8,8 @@ from django.db import transaction
 class CustomerService:
     def get_customer_list(self,request):
         user = request.user
-        customer_list = Customer.objects.filter(employee=user.id)
+        emp = Employee.objects.filter(account_id=user.id).first()
+        customer_list = Customer.objects.filter(employee=emp.id)
         serializer = CustomerSerializer(customer_list, many=True)
         if customer_list:
             return serializer.data

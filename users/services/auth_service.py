@@ -71,6 +71,7 @@ class AuthService:
                 'username': user.username,
                 'email': user.email,
                 'is_changed_password': user.is_changed_password,
+                'is_staff': user.is_staff,
             }
         else:
             raise ValueError("User not found")
@@ -260,8 +261,9 @@ class AuthService:
         except ValueError as ve:
             raise ValueError(f"{ve}")
     def get_object_list(self):
+         
         object_list = Object.objects.all()
-
+        
         serializer = ObjectSerializer(object_list, many=True)
         if object_list.exists():
             return serializer.data

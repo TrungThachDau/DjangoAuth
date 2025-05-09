@@ -2,7 +2,7 @@
 from django.urls import path,include
 from .views.auth import *
 from .views.public import get_all_objects as get_all_objects_public
-from .views.object import get_object_of_customer, authorize_object
+from .views.object import get_object_of_customer, authorize_object, get_object
 from .views.customer import CustomerView, CustomerDetailView
 from .views.employee import EmployeeView
 from .views.employee_role import EmployeeRoleView
@@ -45,7 +45,8 @@ urlpatterns = [
     path('get_all_files/', get_all_objects_public, name='get_all_objects'),
 
     path('objects/get/',get_object_of_customer ,name='get_object_of_customer'),
-    path('objects/authorize/', authorize_object, name='authorize_object'),
+    path('object/<int:object_id>/', get_object , name='get_object'),
+    path('object/authorize/', authorize_object, name='authorize_object'),
 ]
     
     

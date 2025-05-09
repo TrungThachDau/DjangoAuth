@@ -16,7 +16,9 @@ export function refreshToken(){
     .catch(err => console.log(err))
 }
 export async function signIn(username, password) {
-  return await axiosInstance.post("/auth/signin/", { username, password })
+  return await axiosInstance.post("/auth/signin/", { username, password },{
+  })
+  
   .catch(err =>{
     throw err.response.data;
   })

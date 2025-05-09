@@ -1,4 +1,5 @@
 from asgiref.sync import sync_to_async
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.decorators import authentication_classes, permission_classes
@@ -18,10 +19,14 @@ async def sign_in(request):
         auth_service = AuthService()
         token = await sync_to_async(auth_service.sign_in)(request.data)
         user = await sync_to_async(auth_service.get_user)(request.data)
-        response = Response({"message": "Login successful", "data": token, "user":user}, status=status.HTTP_200_OK)
-        response.set_cookie(key='jwt', value=token, httponly=True, secure=True, samesite='None')
-        response.set_cookie(key='user', value=user, httponly=True, secure=True, samesite='None')
-        return Response({"message": "Login successful", "data": token, "user":user}, status=status.HTTP_200_OK)
+        print(token.get('accessToken'))
+        print(user)
+        response = Response({"message": "Login successful", "data": token, "user": user}, status=status.HTTP_200_OK)
+        response.set_cookie(key='is_staff', value=user.get('is_staff'), httponly=True, secure=False, path='/')
+        response.set_cookie(key='accessToken', value=token.get('accessToken'), httponly=True, secure=False, path='/')
+        response.set_cookie(key='refreshToken', value=token.get('refreshToken'), httponly=True, secure=False, path='/')
+        #response.set_cookie(key='user', value=user.id, httponly=True, secure=True, samesite='None', path='/')
+        return response
     except ValueError as e:
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:

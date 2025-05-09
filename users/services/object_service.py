@@ -93,16 +93,21 @@ class ObjectService:
     def get_object(self, request, object_id):
         user = request.user
         object = Object.objects.filter(id=object_id).first()
-        if object.status == ObjectStatus.ACCEPTED:
+        if not object:
+            raise ValueError("Object does not exist")
+        else:
             serializer = ObjectSerializer(object)
             return serializer.data
-        else:
-            emp = Employee.objects.get(account=user.id)
-            customer = Customer.objects.filter(employee=emp.id).first()
-            if object.account.id == customer.account.id:
-                serializer = ObjectSerializer(object)
-                return serializer.data
-            else:
-                raise ValueError("Unauthorized access to this object")
+        # if object.status == ObjectStatus.ACCEPTED:
+        #     serializer = ObjectSerializer(object)
+        #     return serializer.data
+        # else:
+        #     emp = Employee.objects.get(account=user.id)
+        #     customer = Customer.objects.filter(employee=emp.id).first()
+        #     if object.account.id == customer.account.id:
+        #         serializer = ObjectSerializer(object)
+        #         return serializer.data
+        #     else:
+        #         raise ValueError("Unauthorized access to this object")
 
 

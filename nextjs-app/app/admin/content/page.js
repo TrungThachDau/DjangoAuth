@@ -75,7 +75,11 @@ const Content = () => {
         const response = await axiosInstance.get("auth/get_all_files/", {
           headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
         });
-        setData(response.data.data);
+        const files = response.data.data.map(item => ({
+          ...item,
+          key: item.id,
+        }));
+        setData(files);
       } catch (error) {
         notification.error({ message: "Error", description: "Failed to fetch data." });
       } finally {
@@ -88,9 +92,10 @@ const Content = () => {
 
   const columns = [
     { title: 'Name', dataIndex: 'name', key: 'name', width: '30%', ...getColumnSearchProps('name') },
-    { title: 'Extension', dataIndex: 'extension', render: (_, { extension }) => <Tag color="blue">{extension.toUpperCase()}</Tag> },
-    { title: 'Owner', dataIndex: 'account', key: 'account', width: '20%' },
-    { title: 'Updated at', dataIndex: 'updated_at', render: text => dayjs(text).format('YYYY-MM-DD HH:mm:ss') },
+    { title: 'Extension', dataIndex: 'extension', key:'extension', render: (_, { extension }) => <Tag color="blue">{extension.toUpperCase()}</Tag> },
+    { title: 'Owner', dataIndex: 'account', key: 'account', width: '20%', render: (account) => account.name || account.email },
+    { title: 'Updated at', dataIndex: 'updated_at', key:'updated_at', render: text => dayjs(text).format('YYYY-MM-DD HH:mm:ss') },
+    { title: 'Status', dataIndex: 'status', key:'status', render: (_, { status }) => <Tag color={status === 'active' ? 'green' : 'red'}>{status}</Tag> },
   ];
 
   return (

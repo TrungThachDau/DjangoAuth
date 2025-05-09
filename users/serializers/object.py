@@ -1,8 +1,10 @@
 from adrf.serializers import ModelSerializer
 from rest_framework.validators import UniqueValidator
 from users.models.object import Object
+from users.serializers.account import AccountSerializer
 
 class ObjectSerializer(ModelSerializer):
+    account = AccountSerializer(read_only=True)
     class Meta:
         model = Object
         

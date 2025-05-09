@@ -1,4 +1,3 @@
-"use cache";
 "use client";
 import NavBar from "@/components/nav_bar.js";
 import { Button, DatePicker, Form, Input, message } from "antd";
@@ -7,7 +6,9 @@ import dayjs from "dayjs";
 import { refreshToken } from "@/services/authentication.js";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import '@ant-design/v5-patch-for-react-19';
 import './page.css';
+
 const AddCustomer = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,8 @@ const AddCustomer = () => {
 
     setLoading(true); 
     try {
-      await submitData(sessionStorage.getItem("accessToken"));
+      
+      await submitData(requestAnimationFrame.get("accessToken"));
       messageApi.success("Customer added successfully. Default password is 123456. Please change it.");
     } catch (error) {
       if (error.response?.status === 401) {
@@ -53,6 +55,7 @@ const AddCustomer = () => {
           await submitData(newToken);
 
           messageApi.success("Customer added successfully. Default password is 123456. Please change it.");
+          
         } catch (refreshError) {
           messageApi.error("Failed to refresh token. Please log in again.");
           console.error("Error refreshing token:", refreshError);

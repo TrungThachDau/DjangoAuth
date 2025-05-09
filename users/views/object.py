@@ -36,5 +36,16 @@ async def authorize_object(request):
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([AllowAny])
+async def get_object(request, object_id):
+    try:
+        obj_sv = ObjectService()
+        res = await sync_to_async(obj_sv.get_object)(request, object_id)
+        return Response({"data": res}, status=status.HTTP_200_OK)
+    except ValueError as e:
+        return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     

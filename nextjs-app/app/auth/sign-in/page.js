@@ -1,6 +1,6 @@
 "use client";
 import { signIn } from "@/services/authentication";
-import { Button, Form, Input, message, Modal, Spin } from "antd";
+import { Button, Form, Input, message, Modal, Spin, loading } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -8,10 +8,9 @@ import "./page.css";
 
 export default function SignIn() {
   const [messageApi, contextHolder] = message.useMessage();
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [open, setOpen] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (typeof window !== "undefined" && sessionStorage.getItem("refreshToken")) {
       router.push("/customer/");
@@ -43,7 +42,7 @@ export default function SignIn() {
           showModal();
         } else {
           messageApi.success("Sign-in successful.");
-          await router.push("/customer/");
+          await router.push("/admin/customer/");
         }
       } else {
         messageApi.error("Sign-in failed.");
@@ -65,7 +64,6 @@ export default function SignIn() {
   const okModal = () => {
     router.push("/auth/change-password");
   };
-
   const cancelModal = () => {
     setOpen(false);
     sessionStorage.clear();

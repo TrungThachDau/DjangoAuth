@@ -1,19 +1,11 @@
 import { signOut } from '@/services/authentication';
 import { DownOutlined } from '@ant-design/icons';
 import { Dropdown, Space } from 'antd';
-import { useRouter } from 'next/router';
-
+import { useRouter } from 'next/navigation';
+import '@ant-design/v5-patch-for-react-19';
 const onSignOut = async (router) => {
-  const refreshToken = sessionStorage.getItem('refreshToken');
-  if (!refreshToken) {
-    console.error('No refresh token found');
-    router.push('/auth/sign-in');
-    return;
-  }
-
   try {
-    const response = await signOut(refreshToken);
-    console.log(response);
+    await signOut(); 
     sessionStorage.clear();
     router.push('/auth/sign-in');
   } catch (error) {
