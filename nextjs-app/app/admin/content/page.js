@@ -93,7 +93,7 @@ const Content = () => {
   const columns = [
     { title: 'Name', dataIndex: 'name', key: 'name', width: '30%', ...getColumnSearchProps('name') },
     { title: 'Extension', dataIndex: 'extension', key:'extension', render: (_, { extension }) => <Tag color="blue">{extension.toUpperCase()}</Tag> },
-    { title: 'Owner', dataIndex: 'account', key: 'account', width: '20%', render: (account) => account.name || account.email },
+    { title: 'Owner', dataIndex: 'account', key: 'account', width: '20%', render: (account) => account || account.email },
     { title: 'Updated at', dataIndex: 'updated_at', key:'updated_at', render: text => dayjs(text).format('YYYY-MM-DD HH:mm:ss') },
     { title: 'Status', dataIndex: 'status', key:'status', render: (_, { status }) => <Tag color={status === 'active' ? 'green' : 'red'}>{status}</Tag> },
   ];

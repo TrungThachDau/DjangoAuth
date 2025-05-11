@@ -1,11 +1,10 @@
 import Link from "next/link";
 import "./view_bar.css";
-import { Space,Button, Layout } from "antd";
+import { Space, Button, Layout } from "antd";
 import { DownloadOutlined, InfoCircleOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { useState } from "react";
 const { Header } = Layout;
-const ViewBar = ({ view, setView }) => {
-  
-
+const ViewBar = ({ file }) => {
     return (
       <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div className="demo-logo" />
@@ -18,7 +17,6 @@ const ViewBar = ({ view, setView }) => {
               border: "1px solid white",
               color: "white"
             }}
-           
           >
             Download
           </Button>
@@ -30,13 +28,14 @@ const ViewBar = ({ view, setView }) => {
               border: "1px solid white",
               color: "white"
             }}
-            
           >
             Information
           </Button>
         </Space>
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-          <a style={{ color: 'white', fontWeight: 'bold' }}>Filename.jpg</a>
+          <a style={{ color: 'white', fontWeight: 'bold' }}>
+            {file && file.name ? file.name : "Không có dữ liệu"}
+          </a>
         </div>
         <Space align="end">
           <Button
@@ -47,7 +46,6 @@ const ViewBar = ({ view, setView }) => {
               border: "1px solid white",
               color: "white"
             }}
-           
           >
             Share
           </Button>
