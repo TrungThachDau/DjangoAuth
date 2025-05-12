@@ -6,4 +6,5 @@ class AccountSerializer(ModelSerializer):
     class Meta:
         model = Account
         fields = ('id','name', 'username', 'hashed_password', 'email')
-        read_only_fields = ('id',)
+        def __str__(self):
+            return self.id

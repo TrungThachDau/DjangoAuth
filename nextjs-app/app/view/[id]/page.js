@@ -4,8 +4,9 @@ import { Content } from "antd/es/layout/layout";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Row, Spin, Alert } from "antd";
-import ImageLayout from "./image_layot.js";
+import ImageLayout from "./image_layout.js";
 import axiosInstance from "@/axios.js";
+import VideoLayout from "./video_layout.js";
 
 const ViewPage = () => {
     const params = useParams();
@@ -20,10 +21,19 @@ const ViewPage = () => {
         setError(null);
         const fetchFile = async () => {
             try {
-                const response = await axiosInstance.get(`object/${id}/`);
-                setFile(response.data.data);
+                if (sessionStorage.getItem("accessToken") === null) {
+                    const response = await axiosInstance.get(`object/${id}/`);
+                    setFile(response.data.data);
+                }
+                else{
+                    const response = await axiosInstance.get(`object/${id}/`,{
+                        headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
+                    });
+                    setFile(response.data.data);
+                }
+                
             } catch (error) {
-                setError("Không thể tải dữ liệu file.");
+                setError("Failed to fetch file data.");
                 setFile(null);
             } finally {
                 setLoading(false);
@@ -35,7 +45,7 @@ const ViewPage = () => {
     return (
         <Content>
             <ViewBar file={file} />
-            <Row>
+            <Row align="middle" justify="center" style={{ minHeight: "90vh", padding: 24 }}>
                 {(() => {
                     if (loading) {
                         return <Spin />;
@@ -46,11 +56,17 @@ const ViewPage = () => {
                             return (
                                 <ImageLayout imageUrl={file.url} />
                             );
-                        } else {
-                            return <a>Định dạng không hỗ trợ</a>;
+                        }
+                        else if (file.extension === "MP4") {
+                            return (
+                                <VideoLayout imageUrl={file.url}/>
+                            ) ;
+                        }
+                        else {
+                            return setError("Extension not supported.");
                         }
                     } else {
-                        return "Không có dữ liệu";
+                        return "Failed to load file.";
                     }
                 })()}
             </Row>

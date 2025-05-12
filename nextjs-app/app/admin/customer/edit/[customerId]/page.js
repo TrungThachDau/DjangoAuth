@@ -7,7 +7,7 @@ import './page.css';
 import dayjs from 'dayjs';
 import { useRouter } from "next/navigation";
 const UpdateCustomer = () => {
-    const { customerId } = useRouter().query;
+    const { customerId } = useRouter();
     const [customer, setCustomer] = useState([{ }]);
     const [messageApi, contextHolder] = message.useMessage();
     useEffect(() => {

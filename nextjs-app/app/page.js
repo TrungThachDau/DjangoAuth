@@ -10,7 +10,7 @@ async function getData() {
         return response.data.data;
     } catch (error) {
         console.log(error);
-        return []; // Trả về mảng rỗng nếu lỗi
+        return []; 
     }
 }
 

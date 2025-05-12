@@ -77,7 +77,14 @@ const Customer = () => {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      render: (text, record) => <Link href={`/app/customer/${record.id}`}>{text}</Link>,
+      render: (_, record) => (
+        <Link
+          href={`/customer/${record.id}`}
+          style={{ color: "blue", textDecoration: "underline" }}
+        >
+          {record.account?.name}
+        </Link>
+      ),
     },
     {
       title: "Phone",
@@ -103,7 +110,7 @@ const Customer = () => {
             Delete
           </Button>
           <Button type="primary">
-            <Link href={`/app/customer/edit/${record.id}`}>Edit</Link>
+            <Link href={`customer/edit/${record.id}`}>Edit</Link>
           </Button>
         </Space>
       ),
@@ -118,7 +125,8 @@ const Customer = () => {
           headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
         });
         setData(response.data);
-        localStorage.setItem("customerData", JSON.stringify(response.data));
+        console.log(response.data);
+        //localStorage.setItem("customerData", JSON.stringify(response.data));
       } catch (error) {
         await handleApiError(error, fetchCustomerData);
       } finally {

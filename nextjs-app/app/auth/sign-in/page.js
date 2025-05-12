@@ -41,8 +41,15 @@ export default function SignIn() {
         if (!user.is_changed_password) {
           showModal();
         } else {
-          messageApi.success("Sign-in successful.");
-          await router.push("/admin/customer/");
+          if(user.is_staff=== false){
+            messageApi.success("Sign-in successful.");
+            await router.push("/customer/files");
+          }
+          else{
+            messageApi.success("Sign-in successful.");
+            await router.push("/admin/customer/");
+          }
+            
         }
       } else {
         messageApi.error("Sign-in failed.");

@@ -3,7 +3,7 @@ from users.models.employee import Employee
 from users.serializers.account import AccountSerializer
 from users.serializers.customer import CustomerSerializer
 from django.db import transaction
-
+from django.contrib.auth.hashers import make_password
 
 class CustomerService:
     def get_customer_list(self,request):
@@ -20,7 +20,7 @@ class CustomerService:
         new_account = {
             'username': request.data.get('username'),
             'email': request.data.get('email'),
-            'hashed_password': '123456',
+            'hashed_password': make_password('123456'),
             'name': request.data.get('name'),
             'is_authenticated': True,
         }

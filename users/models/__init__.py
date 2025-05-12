@@ -7,3 +7,4 @@ from .post import Post
 from .object import Object
 from .object_history import ObjectHistory
 from .employee import Employee
+from .file_permission import FilePermission

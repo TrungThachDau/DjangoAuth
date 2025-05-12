@@ -2,7 +2,7 @@
 import '@ant-design/v5-patch-for-react-19';
 // app/content/page.js
 import { useState, useEffect, useRef } from "react";
-import { Button, Input, Space, Table, Tag, Upload, notification, message } from "antd";
+import { Button, Input, Space, Table, Tag, Upload, notification, message, Select } from "antd";
 import { SearchOutlined, UploadOutlined } from '@ant-design/icons';
 import { Col, Row } from 'antd';
 import Highlighter from "react-highlight-words";
@@ -89,13 +89,64 @@ const Content = () => {
     
     fetchData();
   }, []);
+  const statusOptions = [
+  { value: 'accepted', label: 'Accepted' },
+  { value: 'rejected', label: 'Rejected' },
+  { value: 'pending', label: 'Pending' },
+  ];
+  const handleChangeStatus = (id) => async (value) => {
+    
+    try {
+      const response = await axiosInstance.post("object/authorize/", {
+        status: value,
+        object_id: id
+      }, {
+        headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
+      });
+      if (response.status === 200) {
+        message.success("Status updated successfully");
+        setData(prevData => prevData.map(item => item.id === id ? { ...item, status: value } : item));
+      }
+    } catch (error) {
+      message.error("Failed to update status");
+    }
+    
+  }
 
   const columns = [
-    { title: 'Name', dataIndex: 'name', key: 'name', width: '30%', ...getColumnSearchProps('name') },
+    { 
+      title: 'Name', 
+      dataIndex: 'name', 
+      key: 'name', 
+      width: '30%', 
+      ...getColumnSearchProps('name'),
+      render: (_,{name,id}) => (
+        <a 
+          href={`/view/${name}`} 
+          style={{ color: 'blue', textDecoration: 'underline' }}
+          onClick={e => {
+            e.preventDefault();
+            router.push(`/view/${id}`);
+          }}
+        >
+          {name}
+        </a>
+      )
+    },
     { title: 'Extension', dataIndex: 'extension', key:'extension', render: (_, { extension }) => <Tag color="blue">{extension.toUpperCase()}</Tag> },
-    { title: 'Owner', dataIndex: 'account', key: 'account', width: '20%', render: (account) => account || account.email },
-    { title: 'Updated at', dataIndex: 'updated_at', key:'updated_at', render: text => dayjs(text).format('YYYY-MM-DD HH:mm:ss') },
-    { title: 'Status', dataIndex: 'status', key:'status', render: (_, { status }) => <Tag color={status === 'active' ? 'green' : 'red'}>{status}</Tag> },
+    { title: 'Owner', dataIndex: 'account', key: 'account', width: '20%', render: (account) => `${account.name} (${account.username})` },
+    { title: 'Updated at', dataIndex: 'updated_at', key:'updated_at', render: (updated_at) =>  dayjs(updated_at).format('h:mm a DD/MM/YYYY') },
+    { title: 'Status', dataIndex: 'status', key:'status', render: (_, { status, id }) => 
+    <>
+    <Select
+      defaultValue={status}
+      style={{ width: 120 }}
+      onChange={handleChangeStatus(id)}
+      options={statusOptions}
+      />
+    </>
+     
+    },
   ];
 
   return (
@@ -117,9 +168,9 @@ const Content = () => {
             columns={columns}
             dataSource={data}
             loading={loading}
-            onRow={(record) => ({
-              onClick: () => router.push(`/view/${record.id}`)
-            })}
+            // onRow={(record) => ({
+            //   onClick: () => router.push(`/view/${record.id}`)
+            // })}
           />
         </Col>
       </Row>

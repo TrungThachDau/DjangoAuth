@@ -134,11 +134,11 @@ def upload_file(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-@custom_permission_classes(["IsStaff"])
+# @custom_permission_classes(["IsStaff"])
 def upload_multi_file(request):
     try:
         auth_sv = AuthService()
-        res = auth_sv.upload_multi_file(request)
+        auth_sv.upload_multi_file(request)
         return Response({"message":"Upload successful"},status=status.HTTP_200_OK)
     except ValueError as e:
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

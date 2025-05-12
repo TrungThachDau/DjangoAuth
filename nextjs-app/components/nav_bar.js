@@ -18,22 +18,26 @@ const NavBar = () => {
 
     checkLoginStatus();
   }, []);
-
+  const nav_item = [
+    { name: "Home", path: "/" },
+    { name: "Customer", path: "/admin/customer" },
+    { name: "Files Request", path: "/admin/Conent" },
+    // { name: "Role Employee", path: "/role_employee" },
+    // { name: "Employee", path: "/employee" },
+  ];
   return (
     <nav className={styles["navbar-custom"]}>
       <div className={styles["navbar-brand"]}>
-        <Link href="/" className={styles["nav-link"]}>
-          Home
-        </Link>
-        <Link href="/customer" className={styles["nav-link"]}>
-          Customer
-        </Link>
-        <Link href="/role_employee" className={styles["nav-link"]}>
-            Role Employee         
-        </Link>
-        <Link href="/employee" className={styles["nav-link"]}>
-          Employee
-        </Link>
+        
+        {nav_item.map((item, index) => (
+          <Link
+            key={index}
+            href={item.path}
+            className={styles["nav-link"]}
+          >
+            {item.name}
+          </Link>
+        ))}
       </div>
       <div className={styles["navbar-menu"]}>
         {isLogin ? (

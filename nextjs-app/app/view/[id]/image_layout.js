@@ -8,7 +8,7 @@ const ImageLayout = ({ imageUrl, altText = 'Image', caption }) => (
             src={imageUrl}
             alt={altText}
             style={{
-                maxWidth: '100%',
+                maxWidth: '90%',
                 height: 'auto',
                 borderRadius: 8,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)'

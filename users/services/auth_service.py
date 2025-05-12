@@ -231,32 +231,36 @@ class AuthService:
             print(f"Error uploading file: {e}")
             raise ValueError(f"{e}")
     def upload_multi_file(self, request):
-        user = request.user
+        user_id = request.user.id
+        print(user_id)
         files = request.FILES.getlist('files') 
-        bucket_name = request.data.get('bucket_name')
+        bucket_name = 'images'
         try:
             minio_sv = MinioService()
             if minio_sv.upload_multi_file(bucket_name, files) is False:
                 raise ValueError()
 
             with transaction.atomic():
-                for file in files:
-                    object_name = file.name                
-                    new_file = {
-                        'thumbnail_url': f"http://{minio_sv.endpoint}/{bucket_name}/thumbnail/{object_name}",
-                        'url': f"http://{minio_sv.endpoint}/{bucket_name}/{object_name}",
-                        'name': object_name,
-                        'status': ObjectStatus.PENDING,
-                        'created_at': datetime.now(),
-                        'updated_at': datetime.now(),
-                        'account': user.id,
-                        'extension': object_name.split('.')[-1].upper() if '.' in object_name else ''
-                    }
-                    serializer_file = ObjectSerializer(data=new_file)
-                    if serializer_file.is_valid():
-                        serializer_file.save()
-                    else:
-                        raise ValueError(serializer_file.errors)
+                if len(files) > 10:
+                    raise ValueError("Too many files")
+                else:
+                    for file in files:
+                        object_name = file.name                
+                        new_file = {
+                            'thumbnail_url': f"http://{minio_sv.endpoint}/{bucket_name}/thumbnail/{object_name}",
+                            'url': f"http://{minio_sv.endpoint}/{bucket_name}/{object_name}",
+                            'name': object_name,
+                            'status': ObjectStatus.PENDING,
+                            'created_at': datetime.now(),
+                            'updated_at': datetime.now(),
+                            'account_id': user_id,
+                            'extension': object_name.split('.')[-1].upper() if '.' in object_name else ''
+                        }
+                        serializer_file = ObjectSerializer(data=new_file)
+                        if serializer_file.is_valid():
+                            serializer_file.save()
+                        else:
+                            raise ValueError(serializer_file.errors)
             return True
         except ValueError as ve:
             raise ValueError(f"{ve}")
@@ -285,7 +289,6 @@ class AuthService:
                 if( extension_name != new_extension):
                     raise ValueError("Extension not match")
                 else:
-
                     minio_sv = MinioService()
                     res = minio_sv.upload_file(bucket_name, file, object_name)
                     if res:

@@ -45,7 +45,7 @@ const AddCustomer = () => {
     setLoading(true); 
     try {
       
-      await submitData(requestAnimationFrame.get("accessToken"));
+      await submitData(sessionStorage.getItem("accessToken"));
       messageApi.success("Customer added successfully. Default password is 123456. Please change it.");
     } catch (error) {
       if (error.response?.status === 401) {

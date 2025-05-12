@@ -26,7 +26,7 @@ async def get_object_of_customer(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-@custom_permission_classes(["IsStaff"])
+# @custom_permission_classes(["IsStaff"])
 async def authorize_object(request):
     try:
         obj_sv = ObjectService()
@@ -37,7 +37,7 @@ async def authorize_object(request):
     except Exception as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['GET'])
-@authentication_classes([JWTAuthentication])
+@authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
 async def get_object(request, object_id):
     try:

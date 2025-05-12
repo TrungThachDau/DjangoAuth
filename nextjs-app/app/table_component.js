@@ -11,7 +11,6 @@ export default function TableComponent({ data }) {
     const [searchedColumn, setSearchedColumn] = useState('');
     const searchInput = useRef(null);
     const router = useRouter();
-    // Đảm bảo tableData luôn là mảng
     const [tableData, setTableData] = useState(Array.isArray(data) ? data : []);
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -101,37 +100,54 @@ export default function TableComponent({ data }) {
     });
     const columns = [
       Object.assign(
-        { title: 'Name', dataIndex: 'name', key: 'name', width: '30%' },
-        getColumnSearchProps('name'),
+      { title: '', dataIndex: 'thumbnail_url', width: '5%', key: 'thumbnail_url', render: (thumbnail_url) => (
+        thumbnail_url !== null && thumbnail_url !== undefined ? (
+          <img src={thumbnail_url} alt="No review" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
+        ) : (
+          <a></a>
+        )
+      ) },
+      //getColumnSearchProps('name'),
       ),
       Object.assign(
-        {
-          title: 'Extension',
-          dataIndex: 'extension',
-          width: '5%',
-          render: (_, { extension }) => (
-            <Tag color="blue" key={extension}>
-              {extension.toUpperCase()}
-            </Tag>
-          ),
-        },
+      { title: 'Name', dataIndex: 'name', key: 'name', width: '30%',render:(name)=>(
+        name
+      ) },
+      getColumnSearchProps('name'),
       ),
       Object.assign(
-        { title: 'Owner', dataIndex: 'account', key: 'account', width: '20%' },
-
-      ),
-      Object.assign(
-        Object.assign(
-          { title: 'Updated at', dataIndex: 'updated_at', key: 'updated_at', width: '20%',render: (_, { updated_at }) => (
-            
-              dayjs(updated_at).format('h:mm a DD/MM/YYYY')
-            
-              )
-          },
+      {
+        title: 'Extension',
+        dataIndex: 'extension',
+        width: '5%',
+        render: (_, { extension }) => (
+        extension.toUpperCase()
         ),
-        {
-          sorter: (a, b) => a.address.length - b.address.length,
+      },
+      ),
+      Object.assign(
+      { 
+        title: 'Owner', 
+        dataIndex: 'account', 
+        key: 'account', 
+        width: '10%',
+        render: (account) => (
+        account.name
+        ),
+      }
+      ),
+      Object.assign(
+      Object.assign(
+        { title: 'Updated at', dataIndex: 'updated_at', key: 'updated_at', width: '20%',render: (_, { updated_at }) => (
+        
+          dayjs(updated_at).format('h:mm a DD/MM/YYYY')
+        
+          )
         },
+      ),
+      {
+        sorter: (a, b) => a.address.length - b.address.length,
+      },
       ),
     ];
     return(
