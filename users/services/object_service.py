@@ -179,44 +179,47 @@ class ObjectService:
     #                         serializer_file.save()
     #                     else:
     #                         raise ValueError(serializer_file.errors)
-    #                 return True
+    #         return True
     #     except ValueError as ve:
     #         raise ValueError(f"{ve}")
-    #     return False
     def upload_multi_file(self, request):
         user_id = request.user.id
-        print(user_id)
-        files = request.FILES.getlist('files') 
+        files = request.FILES.getlist('files')
         bucket_name = 'images'
+
+        if not files:
+            raise ValueError("No files provided")
+
+        if len(files) > 10:
+            raise ValueError("Cannot upload more than 10 files at once")
+
         try:
             minio_sv = MinioService()
             if minio_sv.upload_multi_file(bucket_name, files) is False:
-                raise ValueError()
-
+                raise ValueError("Upload failed")
             with transaction.atomic():
-                if len(files) > 10:
-                    raise ValueError("Too many files")
-                else:
-                    for file in files:
-                        object_name = file.name                
-                        new_file = {
-                            'thumbnail_url': f"http://{minio_sv.endpoint}/{bucket_name}/thumbnail/{object_name}",
-                            'url': f"http://{minio_sv.endpoint}/{bucket_name}/{object_name}",
-                            'name': object_name,
-                            'status': ObjectStatus.PENDING,
-                            'created_at': timezone.now(),
-                            'updated_at': timezone.now(),
-                            'account_id': user_id,
-                            'extension': object_name.split('.')[-1].upper() if '.' in object_name else ''
-                        }
-                        serializer_file = ObjectSerializer(data=new_file)
-                        if serializer_file.is_valid():
-                            serializer_file.save()
-                        else:
-                            raise ValueError(serializer_file.errors)
+                for file in files:
+                    object_name = file.name
+                    new_file = {
+                        'thumbnail_url': f"http://{minio_sv.endpoint}/{bucket_name}/thumbnail/{object_name}",
+                        'url': f"http://{minio_sv.endpoint}/{bucket_name}/{object_name}",
+                        'name': object_name,
+                        'status': ObjectStatus.PENDING,
+                        'created_at': timezone.now(),
+                        'updated_at': timezone.now(),
+                        'account_id': user_id,
+                        'extension': object_name.split('.')[-1].upper() if '.' in object_name else ''
+                    }
+                    serializer_file = ObjectSerializer(data=new_file)
+                    if serializer_file.is_valid():
+                        serializer_file.save()
+                    else:
+                        raise ValueError(f"Invalid file data for {object_name}: {serializer_file.errors}")
             return True
         except ValueError as ve:
-            raise ValueError(f"{ve}")  
+            raise ValueError(f"Upload failed: {ve}")
+        except Exception as e:
+            raise Exception(f"Unexpected error: {str(e)}") 
     def delete_file(self, request):
         object_id = request.data.get('object_id')
         bucket_name = "images"

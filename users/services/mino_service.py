@@ -4,7 +4,7 @@ from io import BytesIO
 from ..utils.resize import resize_image
 from ..utils.filter_file import filter_file
 class MinioService:
-    endpoint = "172.18.20.15:9000"
+    endpoint = "127.0.0.1:9000"
     access_key = "minioadmin"
     secret_key = "minioadmin"
     def __init__(self):
@@ -46,7 +46,7 @@ class MinioService:
                 extension = file.name.split(".")[-1]
                 if extension.lower() not in ["jpg", "jpeg", "png", "gif"]:
                     continue
-                file.seek(0) # Reset the file pointer to the beginning
+                file.seek(0)
                 object_name = file.name
                 byte_object = BytesIO(file.read())
                 resized_object = resize_image(byte_object)

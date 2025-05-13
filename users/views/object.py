@@ -73,21 +73,19 @@ def update_file(request):
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-# @custom_permission_classes(["IsStaff"])
 def upload_multi_file(request):
     try:
         auth_sv = ObjectService()
         res = auth_sv.upload_multi_file(request)
         if res:
-            return Response({"message":"Upload successful"},status=status.HTTP_200_OK)
+            return Response({"message": "Upload successful"}, status=status.HTTP_200_OK)
     except ValueError as e:
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"message": f"Server error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])

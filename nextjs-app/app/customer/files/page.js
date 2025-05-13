@@ -261,8 +261,8 @@ const CustomerFiles = () => {
           // const checksum = await calculateSHA256(file);
           const formData = new FormData();
           // formData.append('checksum', checksum);
-          
-          formData.append('file', file);
+
+          formData.append('files', file);
           try {
             await axiosInstance.post("file/upload/", formData, {
               headers: {
