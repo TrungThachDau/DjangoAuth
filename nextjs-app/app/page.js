@@ -6,7 +6,7 @@ import TableComponent from "@/app/table_component.js";
 async function getData() {
     try {
         console.log('Ok')
-        const response = await axiosInstance.get("get_all_files/");
+        const response = await axiosInstance.get("public/get_all_files/");
         return response.data.data;
     } catch (error) {
         console.log(error);

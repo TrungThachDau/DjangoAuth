@@ -2,12 +2,13 @@
 import { Button, Form, Input, message } from "antd";
 import Link from "next/link";
 import axiosInstance from "../../../axios.js";
+import { signUp } from "@/services/authentication";
 import "./page.css";
 
 export default function SignUp() {
   const [messageApi, contextHolder] = message.useMessage();
 
-  const onSubmitLogin = (values) => {
+  const onSubmitLogin = async (values) => {
     if (!values.name || !values.username || !values.email || !values.password || !values.retypePassword) {
       return messageApi.error("Please fill in all fields").then(r => console.log(r));
     }
@@ -15,21 +16,18 @@ export default function SignUp() {
     if (values.password !== values.retypePassword) {
       return messageApi.error("Passwords do not match").then(r => console.log(r));
     }
-    axiosInstance
-      .post("/auth/signup/", {
-        username: values.username,
-        hashed_password: values.password,
-        email: values.email,
-        name: values.name,
-      })
-      .then(async (response) => {
-        return messageApi.error("Sign up successful.").then(r => console.log(r));
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message || "Network error. Please try again.";
-        messageApi.error(errorMessage).then(r => console.log(r));
-      });
+    const response = await signUp(
+      values.username,
+      values.password,
+      values.email,
+      values.name
+    );
+    if (response.status === 200) {
+      messageApi.success("Sign up successful. Please sign in.");
+      router.push("/sign-in");
+    } else {
+      messageApi.error("Sign up failed.");
+    }
   };
 
   return (

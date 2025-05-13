@@ -5,6 +5,7 @@ import { Button, Modal, Space, Table, message } from "antd";
 import axiosInstance from "@/axios.js";
 import Link  from "next/link";
 import {refreshToken} from "@/services/authentication.js";
+import { getAllCustomers } from "@/services/customer_management.js";
 import { useRouter } from "next/navigation";
 import '@ant-design/v5-patch-for-react-19';
 const Customer = () => {
@@ -32,37 +33,20 @@ const Customer = () => {
   const deleteCustomer = async (id) => {
     try {
       setLoading(true);
-      await axiosInstance.delete(`customer/${id}/`, {
-        headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
+      const response = await fetch(`/api/customers/${id}`, {
+        method: 'DELETE',
       });
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to delete customer');
+      }
+      
       messageApi.success("Customer deleted successfully");
       setData(data.filter((item) => item.id !== id));
     } catch (error) {
-      if (error.response?.status === 401) {
-        try {
-          
-          const newToken = await refreshToken();
-          sessionStorage.setItem("accessToken", newToken);
-          await axiosInstance.delete(`customer/${id}/`, {
-            headers: { Authorization: "Bearer " + newToken },
-          });
-          
-          messageApi.success("Customer deleted successfully");
-          setData(data.filter((item) => item.id !== id));
-          setLoading(false);
-        } catch (refreshError) {
-          messageApi.error("Failed to refresh token. Please log in again.");
-          console.error("Error refreshing token:", refreshError);
-        }
-        finally{
-          setLoading(false);
-        }
-      } else {
-        messageApi.error(error.response?.data?.message || "An error occurred");
-        console.error("Error deleting customer:", error);
-      }
-    }
-    finally{
+      messageApi.error(error.message || 'An error occurred while deleting the customer');
+    } finally {
       setLoading(false);
     }
   };
@@ -116,54 +100,22 @@ const Customer = () => {
       ),
     },
   ];
+  const fetchCustomerData = async () => {
+    try {
+      setLoading(true);
+      const response = await getAllCustomers();
+      if(response){
+        setData(response);
+      }
+      return response.data; 
+    } catch (error) {
+      messageApi.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchCustomerData = async () => {
-      try {
-        setLoading(true);
-        const response = await axiosInstance.get("customer/",{
-          headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
-        });
-        setData(response.data);
-        console.log(response.data);
-        //localStorage.setItem("customerData", JSON.stringify(response.data));
-      } catch (error) {
-        await handleApiError(error, fetchCustomerData);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const handleApiError = async (error, retryFunction) => {
-      const isRetrying = sessionStorage.getItem("isRetrying");
-
-      if (error.response?.status === 400 || error.response?.status === 403) {
-        sessionStorage.clear();
-        await router.push("/auth/sign-in");
-      } else if (error.response?.status === 401) {
-        if (!isRetrying) {
-          try {
-            sessionStorage.setItem("isRetrying", "true"); 
-            const newToken = await refreshToken();
-            sessionStorage.setItem("accessToken", newToken);
-            await retryFunction(); 
-          } catch (refreshError) {
-            sessionStorage.clear();
-            await router.push("/auth/sign-in");
-            console.error("Error refreshing token:", refreshError);
-          } finally {
-            sessionStorage.removeItem("isRetrying");
-          }
-        } else {
-          sessionStorage.clear();
-          await router.push("/auth/sign-in");
-        }
-      } else {
-        messageApi.error(error.response?.data?.message || "An error occurred");
-        console.error("Error:", error);
-      }
-    };
-
     fetchCustomerData();
   }, []);
 

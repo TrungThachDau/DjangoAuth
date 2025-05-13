@@ -131,55 +131,8 @@ def upload_file(request):
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-@api_view(['POST'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-# @custom_permission_classes(["IsStaff"])
-def upload_multi_file(request):
-    try:
-        auth_sv = AuthService()
-        auth_sv.upload_multi_file(request)
-        return Response({"message":"Upload successful"},status=status.HTTP_200_OK)
-    except ValueError as e:
-        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-@api_view(['GET'])
-@authentication_classes([BasicAuthentication])
-@permission_classes([AllowAny])
-def get_all_objects(request):
-    try:
-        auth_sv = AuthService()
-        res = auth_sv.get_object_list()
-        return Response({"data":res},status=status.HTTP_200_OK)
-    except ValueError as e:
-        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
-@authentication_classes([BasicAuthentication])
-@permission_classes([AllowAny])    
-def update_file(request):
-    try:
-        auth_sv = AuthService()
-        res = auth_sv.update_file(request)
-        return Response({"message":"Update successful"},status=status.HTTP_200_OK)
-    except ValueError as e:
-        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
-@authentication_classes([BasicAuthentication])
-@permission_classes([AllowAny])
-def delete_file(request):
-    try:
-        auth_sv = AuthService()
-        res = auth_sv.delete_file(request)
-        return Response({"message":"Delete successful"},status=status.HTTP_200_OK)
-    except ValueError as e:
-        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+

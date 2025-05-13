@@ -6,54 +6,58 @@ import {Button, DatePicker, Form, Input, message} from "antd";
 import './page.css';
 import dayjs from 'dayjs';
 import { useRouter } from "next/navigation";
+import { getCustomer, updateCustomer } from "@/services/customer_management.js";
 const UpdateCustomer = () => {
     const { customerId } = useRouter();
     const [customer, setCustomer] = useState([{ }]);
     const [messageApi, contextHolder] = message.useMessage();
-    useEffect(() => {
+    useEffect(async () => {
         if (!customerId) return;
-        
-        axiosInstance
-            .get("customer/" + customerId + "/", {
-                headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
-            })
-            .then((response) => {
+        try{
+            const response = await getCustomer(customerId);
+            if(response){
                 const data = [
                     {
-                       name: ['name'], value: response.data.name
-                    },
-                    {
-                        name: ['address'],value:response.data.address,
-                    },
-                    {
-                        name: ['phone'],value:response.data.phone,
-                    },
-                    {
-                        name: ['date'], value: dayjs(response.data.date),
-                    }
+                        name: ['name'], value: response.data.name
+                     },
+                     {
+                         name: ['address'],value:response.data.address,
+                     },
+                     {
+                         name: ['phone'],value:response.data.phone,
+                     },
+                     {
+                         name: ['date'], value: dayjs(response.data.date),
+                     }
                 ];
                 setCustomer(data);
-
-            })
-            .catch((error) => {
-                console.error("Error fetching customer data:", error);
-            });
+            }
+        }
+        catch(error){
+            messageApi.error(error.message);
+        }   
     }, [customerId]);
 
-    const onSubmit = (values) => {
-        console.log(values.date)
-        axiosInstance.put("customer/" + customerId + "/", {
-            name:values.name,
-            address:values.address,
-            phone:values.phone,
-            date: dayjs(values.date).format('YYYY-MM-DD')
-        }, {
-            headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
-
-        })
-        .then((response) => {
-            messageApi.success('Customer added successfully').then(r => console.log(r));
-        })
+    const onSubmit = async (values) => {
+        try{
+            const customerData = {
+                name:values.name,
+                address:values.address,
+                phone:values.phone,
+                date: dayjs(values.date).format('YYYY-MM-DD')
+            }
+            setLoading(true);
+            const response = await updateCustomer(customerId, customerData);
+            if(response){
+                messageApi.success('Customer updated successfully').then(r => console.log(r));
+            }
+        }
+        catch(error){
+            messageApi.error(error.message);
+        }
+        finally{
+            setLoading(false);
+        }
     }
     return (
         <>

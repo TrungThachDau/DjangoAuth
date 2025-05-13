@@ -22,11 +22,11 @@ const ViewPage = () => {
         const fetchFile = async () => {
             try {
                 if (sessionStorage.getItem("accessToken") === null) {
-                    const response = await axiosInstance.get(`object/${id}/`);
+                    const response = await axiosInstance.get(`file/${id}/`);
                     setFile(response.data.data);
                 }
                 else{
-                    const response = await axiosInstance.get(`object/${id}/`,{
+                    const response = await axiosInstance.get(`file/${id}/`,{
                         headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
                     });
                     setFile(response.data.data);

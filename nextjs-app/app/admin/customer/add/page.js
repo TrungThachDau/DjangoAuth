@@ -8,12 +8,35 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import '@ant-design/v5-patch-for-react-19';
 import './page.css';
+import { addCustomer } from "@/services/customer_management.js";
 
 const AddCustomer = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
+  const submitData = async () => {
+    const customerData = {
+      name: values.name,
+      phone: values.phone,
+      address: values.address,
+      date: dayjs(values.date).format("YYYY-MM-DD"),
+      email: values.email,
+      username: values.username,
+    }
+    try{
+      setLoading(true);
+      const response = await addCustomer(customerData);
+      if(response){
+          messageApi.success("Customer added successfully. Default password is 123456. Please change it.");
+      }
+    }
+    catch(error){
+      messageApi.error(error.message);
+    }
+    finally{
+      setLoading(false);
+    }
+  };
   const onSubmitCustomer = async (values) => {
     if (!values.name || !values.phone || !values.address || !values.date) {
       messageApi.error("Please fill in all fields");
@@ -24,50 +47,7 @@ const AddCustomer = () => {
       messageApi.error("Phone number must be 10 digits");
       return;
     }
-
-    const submitData = async (token) => {
-      await axiosInstance.post(
-        "customer/",
-        {
-          name: values.name,
-          phone: values.phone,
-          address: values.address,
-          date: dayjs(values.date).format("YYYY-MM-DD"),
-          email: values.email,
-          username: values.username,
-        },
-        {
-          headers: { Authorization: "Bearer " + token },
-        }
-      );
-    };
-
-    setLoading(true); 
-    try {
-      
-      await submitData(sessionStorage.getItem("accessToken"));
-      messageApi.success("Customer added successfully. Default password is 123456. Please change it.");
-    } catch (error) {
-      if (error.response?.status === 401) {
-        try {
-          const newToken = await refreshToken();
-          sessionStorage.setItem("accessToken", newToken);
-          await submitData(newToken);
-
-          messageApi.success("Customer added successfully. Default password is 123456. Please change it.");
-          
-        } catch (refreshError) {
-          messageApi.error("Failed to refresh token. Please log in again.");
-          console.error("Error refreshing token:", refreshError);
-          router.push("/auth/sign-in"); 
-        }
-      } else {
-        messageApi.error(error.response?.data?.message || "An error occurred");
-        console.error("Error adding customer:", error);
-      }
-    } finally {
-      setLoading(false); 
-    }
+    submitData();
   };
   return (
     <>

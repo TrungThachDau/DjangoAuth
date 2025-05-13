@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import authentication_classes, permission_classes
 from asgiref.sync import sync_to_async
 from rest_framework.authentication import BasicAuthentication
-
+from rest_framework import status
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -22,7 +22,7 @@ def custom_permission_classes(permissions):
                     try:
                         account = await sync_to_async(Account.objects.get)(id=request.user.id)
                         if not account.is_staff:
-                            return HttpResponseForbidden("You do not have permission to access this resource.")
+                            return HttpResponseForbidden("You do not have permission to access this resource.", status=status.HTTP_403_FORBIDDEN)
                     except Account.DoesNotExist:
                         return HttpResponseForbidden("Account does not exist.")
             return func(request, *args, **kwargs)

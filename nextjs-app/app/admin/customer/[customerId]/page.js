@@ -5,8 +5,7 @@ import axiosInstance from "@/axios.js";
 import NavBar from "@/components/nav_bar.js";
 import { message, Spin } from "antd";
 import "./page.css";
-import { refreshToken } from "@/services/authentication.js";
-
+import { getCustomer } from "@/services/customer_management.js";
 
 const Detail = () => {
   const params = useParams();
@@ -14,42 +13,26 @@ const Detail = () => {
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-
+  const fetchCustomer = async () => {
+    try{
+      setLoading(true);
+      const response = await getCustomer(customerId);
+      if(response){
+        setCustomer(response);
+      }
+    }
+    catch(error){
+      message.error(error.message);
+    }
+    finally{
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     if (!customerId) return;
-
-    const fetchCustomer = async () => {
-      try {
-        const response = await axiosInstance.get(`customer/${customerId}/`, {
-          headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
-        });
-        setCustomer(response.data);
-      } catch (error) {
-        if (error.response?.status === 401) {
-          try {
-            const newToken = await refreshToken();
-            sessionStorage.setItem("accessToken", newToken);
-            const retryResponse = await axiosInstance.get(`customer/${customerId}/`, {
-              headers: { Authorization: "Bearer " + newToken },
-            });
-            setCustomer(retryResponse.data);
-          } catch (refreshError) {
-            message.error("Failed to refresh token. Please log in again.");
-            console.error("Error refreshing token:", refreshError);
-            router.push("/auth/sign-in");
-          }
-        } else {
-          message.error("Failed to fetch customer details.");
-          console.error("Error fetching customer data:", error);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCustomer();
   }, [customerId]);
-
+        
   if (loading) {
     return (
       <div className="loading-container">

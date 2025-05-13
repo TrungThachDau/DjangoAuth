@@ -10,6 +10,7 @@ import axiosInstance from "@/axios";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import NavBar from "@/components/nav_bar";
+import { getAllFilesRequest } from "@/services/file_management";
 
 const Content = () => {
   const [data, setData] = useState([]);
@@ -72,15 +73,16 @@ const Content = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get("auth/get_all_files/", {
-          headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
-        });
-        const files = response.data.data.map(item => ({
+        const response = await getAllFilesRequest();
+        const files = response.data.map(item => ({
           ...item,
           key: item.id,
         }));
         setData(files);
       } catch (error) {
+        if (error.response && error.response.status === 401) {
+          
+        }
         notification.error({ message: "Error", description: "Failed to fetch data." });
       } finally {
         setLoading(false);
@@ -89,6 +91,8 @@ const Content = () => {
     
     fetchData();
   }, []);
+  
+
   const statusOptions = [
   { value: 'accepted', label: 'Accepted' },
   { value: 'rejected', label: 'Rejected' },
@@ -97,7 +101,7 @@ const Content = () => {
   const handleChangeStatus = (id) => async (value) => {
     
     try {
-      const response = await axiosInstance.post("object/authorize/", {
+      const response = await axiosInstance.post("file/authorize/", {
         status: value,
         object_id: id
       }, {

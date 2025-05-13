@@ -1,15 +1,13 @@
 "use client";
-import axiosInstance from '@/axios.js';
 import NavBar from "@/components/nav_bar.js";
 import { Button, Form, Input, message } from 'antd';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import './page.css';
-
+import { changePassword } from "@/services/authentication";
+import '@ant-design/v5-patch-for-react-19';
 export default function ChangePassword() {
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const onSubmitChange = async (values) => {
     if (!values.old_password || !values.new_password) {
@@ -17,31 +15,23 @@ export default function ChangePassword() {
       return;
     }
 
-    const username = sessionStorage.getItem('username');
-    const accessToken = sessionStorage.getItem('accessToken');
-
-    if (!username || !accessToken) {
-      messageApi.error('You are not logged in. Please log in first.');
-      return;
-    }
-
     setLoading(true);
-    try {
-      await axiosInstance.post('/auth/change-password/', {
-        accessToken:accessToken,
-        old_password: values.old_password,
-        new_password: values.new_password,
-      }, {
-        headers: { Authorization: "Bearer " + accessToken }
-      });
-      messageApi.success('Change successful');
-      await router.push("/customer/");
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || 'An error occurred. Please try again.';
-      messageApi.error(errorMessage);
-    } finally {
+    try{
+      const response = await changePassword(values.old_password, values.new_password);
+      if(response.status === 201){
+        messageApi.success('Change successful');
+      }
+      else{
+        messageApi.error('An error occurred. Please try again.');
+      }
+    }
+    catch(error){
+      messageApi.error('An error occurred. Please try again.');
+    }
+    finally{
       setLoading(false);
     }
+
   };
 
   return (

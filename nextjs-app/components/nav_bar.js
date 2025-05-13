@@ -21,7 +21,7 @@ const NavBar = () => {
   const nav_item = [
     { name: "Home", path: "/" },
     { name: "Customer", path: "/admin/customer" },
-    { name: "Files Request", path: "/admin/Conent" },
+    { name: "Files Request", path: "/admin/files_request" },
     // { name: "Role Employee", path: "/role_employee" },
     // { name: "Employee", path: "/employee" },
   ];

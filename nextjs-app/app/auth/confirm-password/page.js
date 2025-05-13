@@ -22,31 +22,25 @@ export default function ConfirmPassword() {
   //   }
   // }, [token, router]);
 
-  const onSubmitLogin = (values) => {
+  const onSubmitLogin = async (values) => {
     if (!values.password || values.password.length < 8) {
       return messageApi.error("Password must be at least 8 characters long").then(r => console.log(r));
     }
 
     setLoading(true); 
-    const url = `/confirm-new-password/${token}/`;
-    axiosInstance
-      .post(url, {
-        new_password: values.password,
-      })
-      .then(response => {
-        console.log(response.data);
+    try{
+      const response = await confirmNewPassword(token, values.password);
+      if(response){
         messageApi.success("Password reset successful").then(r => console.log(r));
         router.push("/auth/sign-in");
-      })
-      .catch(error => {
-        const errorMessage =
-          error.response?.data?.message || "An error occurred. Please try again.";
-        console.error("There was an error!", error);
-        messageApi.error(errorMessage).then(r => console.log(r));
-      })
-      .finally(() => {
-        setLoading(false); 
-      });
+      }
+    }
+    catch(error){
+      messageApi.error("An error occurred. Please try again.").then(r => console.log(r));
+    }
+    finally{
+      setLoading(false);
+    }
   };
 
   return (
