@@ -23,6 +23,7 @@ class Object(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, blank=True, null=True)
     extension = models.CharField(max_length=10, null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
+    checksum = models.CharField(max_length=255, null=True, blank=True)
     def __str__(self):
         return self.name
 

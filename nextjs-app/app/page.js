@@ -1,8 +1,8 @@
 "use server"
 // import styles from "./page.module.css";
-
 import axiosInstance from "@/axios.js";
-import TableComponent from "@/app/table_component.js";
+import TableComponent from "@/components/table_component.js";
+import MasoryLayout from "@/components/mansory_layout.js";
 async function getData() {
     try {
         console.log('Ok')
@@ -17,11 +17,12 @@ async function getData() {
 export default async function Home() {
 
     const data = await getData();    
-  return (
-    <div>
-            <div>
-            <TableComponent data={data}/>
-            </div>
-    </div>
-  )
+    return (
+      <div>
+              <div>
+              {/* <MasoryLayout data={data}/> */}
+              <TableComponent data={data}/>
+              </div>
+      </div>
+    )
 }

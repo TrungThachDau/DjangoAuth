@@ -63,7 +63,7 @@ const Customer = () => {
       key: "name",
       render: (_, record) => (
         <Link
-          href={`/customer/${record.id}`}
+          href={`customer/${record.id}`}
           style={{ color: "blue", textDecoration: "underline" }}
         >
           {record.account?.name}
@@ -105,7 +105,7 @@ const Customer = () => {
       setLoading(true);
       const response = await getAllCustomers();
       if(response){
-        setData(response);
+        setData(response.data);
       }
       return response.data; 
     } catch (error) {

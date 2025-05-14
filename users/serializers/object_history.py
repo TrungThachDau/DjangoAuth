@@ -1,5 +1,4 @@
 from adrf.serializers import ModelSerializer
-from rest_framework.validators import UniqueValidator
 from users.models.object_history import ObjectHistory
 
 class ObjectHistorySerializer(ModelSerializer):

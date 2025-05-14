@@ -11,7 +11,7 @@ export async function getAllCustomers(){
         }
     )
     .then(res => {
-        return res.data;
+        return res;
     })
     .catch(err => {
         handleApiError(err, async () => await getAllCustomers());
@@ -26,7 +26,7 @@ export async function deleteCustomer(id){
         }
     )
     .then(res => {
-        return res.data;
+        return res;
     })
     .catch(err => {
         handleApiError(err, async () => await deleteCustomer(id));
@@ -41,7 +41,7 @@ export async function addCustomer(customerData){
         }
     )
     .then(res => {
-        return res.data;
+        return res;
     })
     .catch(err => {
         handleApiError(err, async () => await addCustomer(customerData));
@@ -56,7 +56,7 @@ export async function getCustomer(id){
         }
     ) 
     .then(res => {
-        return res.data;
+        return res;
     })
     .catch(err => {
         handleApiError(err, async () => await getCustomer(id));
@@ -71,7 +71,7 @@ export async function updateCustomer(id, customerData){
         }
     )
     .then(res => {
-        return res.data;
+        return res;
     })
     .catch(err => {
         handleApiError(err, async () => await updateCustomer(id, customerData));

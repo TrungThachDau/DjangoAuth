@@ -10,7 +10,7 @@ import axiosInstance from "@/axios";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import NavBar from "@/components/nav_bar";
-import { getAllFilesRequest } from "@/services/file_management";
+import { getAllFilesRequest, authorizeFile } from "@/services/file_management";
 
 const Content = () => {
   const [data, setData] = useState([]);
@@ -101,12 +101,7 @@ const Content = () => {
   const handleChangeStatus = (id) => async (value) => {
     
     try {
-      const response = await axiosInstance.post("file/authorize/", {
-        status: value,
-        object_id: id
-      }, {
-        headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
-      });
+      const response = await authorizeFile(id,value);
       if (response.status === 200) {
         message.success("Status updated successfully");
         setData(prevData => prevData.map(item => item.id === id ? { ...item, status: value } : item));

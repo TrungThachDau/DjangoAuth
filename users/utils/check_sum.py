@@ -1,6 +1,5 @@
 import hashlib
 
-
 def calculate_sha256(file_content):
     try:
 

@@ -1,8 +1,9 @@
 from redis import Redis
-
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
 class RedisService:
-    def __init__(self, host='localhost', port=6379, db=0):
+    def __init__(self, host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=os.getenv("REDIS_DB")):
         self.redis = Redis(host=host, port=port, db=db,decode_responses=True)
 
     def set_value(self, key, value):

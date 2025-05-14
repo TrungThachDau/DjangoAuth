@@ -52,14 +52,19 @@ const ViewPage = () => {
                     } else if (error) {
                         return <Alert message={error} type="error" showIcon />;
                     } else if (file) {
-                        if (file.extension === "PNG") {
+                        if (file.extension === "PNG"||file.extension === "JPEG"||file.extension === "JPG") {
                             return (
                                 <ImageLayout imageUrl={file.url} />
                             );
                         }
-                        else if (file.extension === "MP4") {
+                        else if (file.extension === "MP4"|| file.extension === "MP3") {
                             return (
                                 <VideoLayout imageUrl={file.url}/>
+                            ) ;
+                        }
+                        else if (file.extension === "JSON") {
+                            return (
+                                <JsonLayout data={file.data} />
                             ) ;
                         }
                         else {

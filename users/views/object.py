@@ -12,7 +12,7 @@ from rest_framework import status
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-# @custom_permission_classes(["IsStaff"])
+@custom_permission_classes(["IsStaff"])
 async def get_object_of_customer(request):
     try:
         obj_sv = ObjectService()
@@ -31,7 +31,8 @@ async def authorize_object(request):
     try:
         obj_sv = ObjectService()
         res = await sync_to_async(obj_sv.authorize_object)(request)
-        return Response({"message": "Authorize object successfully"}, status=status.HTTP_200_OK)
+        if res:
+            return Response({"message": "Authorize object successfully"}, status=status.HTTP_200_OK)
     except ValueError as e:
         return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
@@ -90,10 +91,10 @@ def upload_multi_file(request):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 @custom_permission_classes(["IsStaff"])
-def get_all_objects(request):
+async def get_all_objects(request):
     try:
         auth_sv = ObjectService()
-        res = auth_sv.get_object_list(request)
+        res = await sync_to_async(auth_sv.get_object_list)(request)
         return Response({"data":res},status=status.HTTP_200_OK)
     except ValueError as e:
         return Response({"message": str(e)}, status=status.HTTP_403_FORBIDDEN)

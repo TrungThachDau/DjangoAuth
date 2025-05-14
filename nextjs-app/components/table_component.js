@@ -120,6 +120,7 @@ export default function TableComponent({ data }) {
         title: 'Extension',
         dataIndex: 'extension',
         width: '5%',
+        ...getColumnSearchProps('extension'),
         render: (_, { extension }) => (
         extension.toUpperCase()
         ),

@@ -146,59 +146,25 @@ class ObjectService:
             return serializer.data
         else:
             return []
-    # def upload_multi_file(self, request):
-    #     user_id = request.user.id
-    #     print(user_id)
-    #     files = request.FILES.getlist('files')
-    #     # checksums = request.data.getlist('checksums')
-    #     bucket_name = 'images'
-    #     try:
-    #         # ...existing code...
-    #         minio_sv = MinioService()
-    #         if minio_sv.upload_multi_file(bucket_name, files) is False:
-    #             raise ValueError()
 
-    #         with transaction.atomic():
-    #             if len(files) > 10:
-    #                 raise ValueError("Too many files")
-    #             else:
-    #                 for file in files:
-    #                     object_name = file.name
-    #                     new_file = {
-    #                         'thumbnail_url': f"http://{minio_sv.endpoint}/{bucket_name}/thumbnail/{object_name}",
-    #                         'url': f"http://{minio_sv.endpoint}/{bucket_name}/{object_name}",
-    #                         'name': object_name,
-    #                         'status': ObjectStatus.PENDING,
-    #                         'created_at': timezone.now(),
-    #                         'updated_at': timezone.now(),
-    #                         'account_id': user_id,
-    #                         'extension': object_name.split('.')[-1].upper() if '.' in object_name else ''
-    #                     }
-    #                     serializer_file = ObjectSerializer(data=new_file)
-    #                     if serializer_file.is_valid():
-    #                         serializer_file.save()
-    #                     else:
-    #                         raise ValueError(serializer_file.errors)
-    #         return True
-    #     except ValueError as ve:
-    #         raise ValueError(f"{ve}")
     def upload_multi_file(self, request):
         user_id = request.user.id
         files = request.FILES.getlist('files')
+        checksums = request.data.getlist('checksums')
         bucket_name = 'images'
-
-        if not files:
-            raise ValueError("No files provided")
+        if not files or not checksums:
+            raise ValueError("No files or checksums provided")
 
         if len(files) > 10:
             raise ValueError("Cannot upload more than 10 files at once")
 
         try:
+            
             minio_sv = MinioService()
-            if minio_sv.upload_multi_file(bucket_name, files) is False:
+            if minio_sv.upload_multi_file(bucket_name, files,checksums) is False:
                 raise ValueError("Upload failed")
             with transaction.atomic():
-                for file in files:
+                for file,checksum in zip(files,checksums):
                     object_name = file.name
                     new_file = {
                         'thumbnail_url': f"http://{minio_sv.endpoint}/{bucket_name}/thumbnail/{object_name}",
@@ -208,13 +174,14 @@ class ObjectService:
                         'created_at': timezone.now(),
                         'updated_at': timezone.now(),
                         'account_id': user_id,
-                        'extension': object_name.split('.')[-1].upper() if '.' in object_name else ''
+                        'extension': object_name.split('.')[-1].upper() if '.' in object_name else '',
+                        'checksum': checksum
                     }
                     serializer_file = ObjectSerializer(data=new_file)
                     if serializer_file.is_valid():
                         serializer_file.save()
                     else:
-                        raise ValueError(f"Invalid file data for {object_name}: {serializer_file.errors}")
+                        raise ValueError(f"Can't upload {object_name}: {serializer_file.errors}")
             return True
         except ValueError as ve:
             raise ValueError(f"Upload failed: {ve}")
@@ -288,6 +255,5 @@ class ObjectService:
                 raise ValueError("File not found")
         except ValueError as ve:
             raise ValueError(f"{ve}")
-        return False  # <--- Thêm dòng này để luôn trả về giá trị
 
 

@@ -7,8 +7,9 @@ from django.contrib.auth.hashers import make_password
 
 class CustomerService:
     def get_customer_list(self,request):
-        user = request.user
-        emp = Employee.objects.filter(account_id=user.id).first()
+        user_id = request.user.id
+        
+        emp = Employee.objects.filter(account_id=user_id).first()
         customer_list = Customer.objects.filter(employee=emp.id)
         serializer = CustomerSerializer(customer_list, many=True)
         if customer_list:
@@ -16,7 +17,7 @@ class CustomerService:
         else:
             return []
     def create_new_customer(self, request):
-        user = request.user
+        user_id = request.user.id
         new_account = {
             'username': request.data.get('username'),
             'email': request.data.get('email'),
@@ -24,7 +25,7 @@ class CustomerService:
             'name': request.data.get('name'),
             'is_authenticated': True,
         }
-        emp_id = Employee.objects.filter(account_id=user.id).first()
+        emp_id = Employee.objects.filter(account_id=user_id).first()
         # Dữ liệu cho Customer
         customer_data = {
             'address': request.data.get('address'),
@@ -51,7 +52,8 @@ class CustomerService:
     
     def update_customer(self,request,customer_id):
         customer = Customer.objects.filter(id=customer_id).first()
-        user = request.user
+        user_id = request.user.id
+        user = Employee.objects.filter(account_id=user_id).first()
         if customer:
             customer.employee = user
             serializer = CustomerSerializer(customer, data=request.data)
@@ -65,7 +67,7 @@ class CustomerService:
     
     def delete_customer(self,request,customer_id):
         customer = Customer.objects.filter(id=customer_id).first()
-        user = request.user
+        user_id = request.user.id
         if customer:
             customer.delete()
             return {"message": "Customer deleted successfully"}

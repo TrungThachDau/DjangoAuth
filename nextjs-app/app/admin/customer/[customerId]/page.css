@@ -20,7 +20,7 @@ body {
     padding: 40px;
     max-width: 500px;
     width: 100%;
-    text-align: center;
+    text-align: left;
   }
   
   .detail-title {
@@ -28,6 +28,7 @@ body {
     font-weight: 600;
     color: #1d1d1f;
     margin-bottom: 20px;
+    align-items: start;
   }
   
   .detail-info p {

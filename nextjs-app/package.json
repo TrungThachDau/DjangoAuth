@@ -17,10 +17,13 @@
     "axios": "^1.8.4",
     "dayjs": "^1.11.13",
     "next": "^15.3.1",
+    "prop-types": "^15.8.1",
     "rc-util": "^5.44.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-highlight-words": "^0.21.0"
+    "react-highlight-words": "^0.21.0",
+    "react-layout-masonry": "^1.2.0",
+    "react-responsive-masonry": "^2.7.1"
   },
   "type": "module"
 }

@@ -5,16 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import "./page.css";
-
+import '@ant-design/v5-patch-for-react-19';
 export default function SignIn() {
   const [messageApi, contextHolder] = message.useMessage();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
-    if (typeof window !== "undefined" && sessionStorage.getItem("refreshToken")) {
-      router.push("/customer/");
-    }
+    // if (typeof window !== "undefined" && sessionStorage.getItem("refreshToken")) {
+    //   router.push("/customer/");
+    // }
   }, []);
 
   const showModal = () => {

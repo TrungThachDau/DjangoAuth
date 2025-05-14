@@ -13,6 +13,7 @@ import NavBar from "@/components/nav_bar";
 import { MoreOutlined } from '@ant-design/icons';
 import '@ant-design/v5-patch-for-react-19';
 import {calculateSHA256} from "@/utils/checksum";
+import { uploadFile, updateFile, deleteFile } from "@/services/file_management";
 const CustomerFiles = () => {
   const [data, setData] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -103,18 +104,14 @@ const CustomerFiles = () => {
     if (!file || !updatingRecord) return;
     const token = sessionStorage.getItem("accessToken");
     const formData = new FormData();
-    // formData.append('checksum', checksum);
     formData.append('file', file);
     formData.append('object_id', updatingRecord.id);
     try {
-      await axiosInstance.post("file/update/", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        }
-      });
-      notification.success({ message: "Success", description: "File updated successfully." });
-      fetchData();
+      const response = await updateFile(formData)
+      if (response.status === 200) {
+        notification.success({ message: "Success", description: "File updated successfully." });
+        fetchData();
+      }
     } catch (err) {
       notification.error({ message: "Error", description: "Failed to update file." });
     } finally {
@@ -153,18 +150,11 @@ const CustomerFiles = () => {
             e.preventDefault();
             if (record.status === 'rejected') {
               try {
-                await axiosInstance.post(
-                  `file/delete/`,
-                  {
-                      object_id:record.id
-                  },
-                  {
-                    headers: { Authorization: "Bearer " + sessionStorage.getItem("accessToken") },
-                  }
-                  
-                );
-                notification.success({ message: "Deleted", description: "File deleted successfully." });
-                fetchData();
+                const response = await deleteFile(record.id)
+                if (response.status === 200) {
+                  notification.success({ message: "Deleted", description: "File deleted successfully." });
+                  fetchData();
+                }
               } catch (error) {
                 notification.error({ message: "Error", description: "Failed to delete file." });
               }
@@ -198,7 +188,9 @@ const CustomerFiles = () => {
         </a>
       )
     },
-    { title: 'Extension', dataIndex: 'extension', key:'extension', render: (_, { extension }) => <Tag color="blue">{extension.toUpperCase()}</Tag> },
+    { title: 'Extension', dataIndex: 'extension', key:'extension',
+      ...getColumnSearchProps('extension'), 
+      render: (_, { extension }) => <Tag color="blue">{extension.toUpperCase()}</Tag> },
     { title: 'Owner', dataIndex: 'account', key: 'account', width: '20%', render: (account) => account.name || account.email },
     { title: 'Updated at', dataIndex: 'updated_at', key:'updated_at', render: (updated_at) =>  dayjs(updated_at).format('h:mm a DD/MM/YYYY') },
     { title: 'Status', dataIndex: 'status', key:'status', render: (_, { status }) => 
@@ -230,7 +222,7 @@ const CustomerFiles = () => {
     setFileList(info.fileList);
     if (info.file.status === 'done') {
       message.success(`${info.file.name} file uploaded successfully`);
-      setFileList([]); 
+      // setFileList([]); 
       try {
         await fetchData();
       } catch (err) {
@@ -251,31 +243,28 @@ const CustomerFiles = () => {
         fileList={fileList}
         onChange={handleUploadChange}
 
-        customRequest={async ({ file, onSuccess, onError, onProgress }) => {
+        customRequest={async ({ file, onSuccess, onErrors}) => {
           const token = sessionStorage.getItem("accessToken");
           if (!token) {
             onError({ message: "Missing access token. Please log in again." });
             return;
           }
           //Checksum sha-256
-          // const checksum = await calculateSHA256(file);
+          const checksum = await calculateSHA256(file);
           const formData = new FormData();
-          // formData.append('checksum', checksum);
-
           formData.append('files', file);
+          formData.append('checksums', checksum);
           try {
-            await axiosInstance.post("file/upload/", formData, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'multipart/form-data',
-              },UploadProgress: (progressEvent) => {
-
-                const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);(percent);
-                onProgress(percent);
-            }});
-            onSuccess();
+            const response = await uploadFile(formData);
+            if (response.status === 200) {
+              onSuccess();
+            }
+            else if(response.response.status === 400){
+              console.log(response);
+              onError({ message: "File already exists" });
+            }
           } catch (err) {
-            const errorMessage = err.response?.data?.message || "Failed to upload file. Please try again.";
+            const errorMessage = err.message || "Failed to upload file. Please try again";
             onError({ message: errorMessage });
           }
         }}
@@ -299,7 +288,7 @@ const CustomerFiles = () => {
         type="file"
         ref={hiddenUploadRef}
         style={{ display: 'none' }}
-        accept=".jpg,.png,.jpeg,.gif,.mp3,mp4,.json"
+        // accept=".jpg,.png,.jpeg,.gif,.mp3,.mp4,.json"
         onChange={handleHiddenUploadChange}
       />
       {contextHolder}

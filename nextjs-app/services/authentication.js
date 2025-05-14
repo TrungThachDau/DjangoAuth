@@ -1,9 +1,9 @@
 import axiosInstance from "../axios";
 
-export function refreshToken(){
+export async function refreshToken(){
     const refreshToken = sessionStorage.getItem('refreshToken');
     console.log(refreshToken);
-    return axiosInstance.post('/token/refresh/',{
+    return await axiosInstance.post('/token/refresh/',{
         refresh:refreshToken
     })
     .then(res => {

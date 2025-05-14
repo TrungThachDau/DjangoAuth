@@ -1,6 +1,5 @@
 
 from adrf.serializers import ModelSerializer
-from django.contrib.auth.hashers import make_password
 from users.models.account import Account
 
 class SignUpSerializer(ModelSerializer):

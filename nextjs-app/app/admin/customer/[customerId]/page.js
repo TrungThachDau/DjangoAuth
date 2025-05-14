@@ -18,7 +18,7 @@ const Detail = () => {
       setLoading(true);
       const response = await getCustomer(customerId);
       if(response){
-        setCustomer(response);
+        setCustomer(response.data);
       }
     }
     catch(error){

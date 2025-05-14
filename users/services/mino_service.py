@@ -1,12 +1,16 @@
+import os
 from minio import Minio
 from minio.error import S3Error
 from io import BytesIO
 from ..utils.resize import resize_image
 from ..utils.filter_file import filter_file
+from ..utils.check_sum import verify_sha256
+from dotenv import load_dotenv
+load_dotenv()
 class MinioService:
-    endpoint = "127.0.0.1:9000"
-    access_key = "minioadmin"
-    secret_key = "minioadmin"
+    endpoint = os.getenv("MINIO_ENDPOINT")
+    access_key = os.getenv("MINIO_ACCESS_KEY")
+    secret_key = os.getenv("MINIO_SECRET_KEY")
     def __init__(self):
         self.minio_client = Minio(
             self.endpoint,
@@ -14,32 +18,30 @@ class MinioService:
             secret_key=self.secret_key,
             secure=False
         )
-    def upload_multi_file(self, bucket_name, files):
-        
-        if len(files) > 3:
-           raise ValueError("You can only upload a maximum of 3 files at a time.")
-        else:
-            backup_files = []
+    def upload_multi_file(self, bucket_name, files,checksums):
+        backup_files = []
+        for file,checksum in zip(files,checksums):
+            if verify_sha256(file,checksum) is False:
+                return ValueError(f"Checksum verification failed {file.name}")
+            backup_files.append(file)
+            if not self.minio_client.bucket_exists(bucket_name):
+                print(f"Bucket {bucket_name} does not exist.")
+                return False
             for file in files:
-                backup_files.append(file)
-                if not self.minio_client.bucket_exists(bucket_name):
-                    print(f"Bucket {bucket_name} does not exist.")
+                if filter_file(file):       
+                    object_name = file.name
+                    byte_object = BytesIO(file.read())
+                    self.minio_client.put_object(
+                        bucket_name=bucket_name,
+                        object_name=object_name,
+                        data=byte_object, 
+                        length=file.size,  
+                        content_type=file.content_type or "application/octet-stream"
+                    )
+                else:
                     return False
-                for file in files:
-                    if filter_file(file):       
-                        object_name = file.name
-                        byte_object = BytesIO(file.read())
-                        self.minio_client.put_object(
-                            bucket_name=bucket_name,
-                            object_name=object_name,
-                            data=byte_object, 
-                            length=file.size,  
-                            content_type=file.content_type or "application/octet-stream"
-                        )
-                    else:
-                        return False
-                self.upload_multi_file_with_resize(backup_files, bucket_name)
-                return True
+            self.upload_multi_file_with_resize(backup_files, bucket_name)
+            return True
     def upload_multi_file_with_resize(self,backup_files, bucket_name):
         for file in backup_files:
             if filter_file(file):
