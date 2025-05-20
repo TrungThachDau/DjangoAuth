@@ -1,5 +1,6 @@
 import os
 import tempfile
+import abc
 from users.models.account import Account
 from django.utils import timezone
 
@@ -14,7 +15,33 @@ from django.db import transaction
 from users.serializers.object_history import ObjectHistorySerializer
 from users.services.mino_service import MinioService
 from users.utils.check_sum import verify_sha256
-class ObjectService:
+class IObjectService(abc.ABC):
+    @abc.abstractmethod
+    def get_all_objects_of_customer(self,request):
+        pass
+    @abc.abstractmethod
+    def authorize_object(self,request):
+        pass
+    @abc.abstractmethod
+    def get_object(self, request, object_id):
+        pass
+    @abc.abstractmethod
+    def get_object_list(self, request):
+        pass
+    @abc.abstractmethod
+    def upload_multi_file(self, request):
+        pass
+    @abc.abstractmethod
+    def delete_file(self, request):
+        pass
+    @abc.abstractmethod
+    def update_file(self, request):
+        pass
+    @abc.abstractmethod
+    def update_permission(self, object_id, permission_list):
+        pass
+
+class ObjectService(IObjectService):
     def get_all_objects_of_customer(self,request):
         user_id = request.user.id
         user = Account.objects.filter(id=user_id).first()
@@ -45,33 +72,6 @@ class ObjectService:
             except Exception as e:
                 raise ValueError(f"An error occurred: {str(e)}")
 
-        #Load objects of customer
-    # def authorize_object(self,request):
-    #     object_id = request.data.get('object_id')
-    #     status = request.data.get('status')
-    #     # user = request.user
-    #     try:
-    #         #Check user is employee of customer
-    #         # emp = Employee.objects.get(account=user.id)
-    #         # customer = Customer.objects.filter(employee=emp.id).first()
-    #             #Check object is exist
-    #         obj = Object.objects.filter(id=object_id).first()
-    #         if obj:
-    #             obj.status = status
-    #             serializer = ObjectSerializer(instance=obj, data={"status": obj.status}, partial=True)
-    #             if serializer.is_valid():
-    #                 serializer.save()
-    #                 return serializer.data
-    #             else:
-    #                 raise ValueError(serializer.errors)
-    #         else:
-    #             raise ValueError("Object does not exist")
-    #     except Customer.DoesNotExist:
-    #         raise ValueError("Customer does not exist")
-    #     except Object.DoesNotExist:
-    #         raise ValueError("Object does not exist")
-    #     except Exception as e:
-    #         raise ValueError(f"An error occurred: {str(e)}")
     def update_permission(object_id,permission_list):
         #Delete first
         serializer = FilePermission.objects.filter(object=object_id)

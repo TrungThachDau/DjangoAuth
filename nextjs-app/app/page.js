@@ -16,11 +16,16 @@ async function getData() {
 
 export default async function Home() {
 
-    const data = await getData();    
+    const data = await getData();
+    //filter image file
+    const image = data.filter(item => item.extension === 'JPG' || item.extension === 'PNG' || item.extension === 'JPEG' || item.extension === 'GIF');
+    //filter video file
+
     return (
       <div>
               <div>
               {/* <MasoryLayout data={data}/> */}
+               <MasoryLayout data={image}/>
               <TableComponent data={data}/>
               </div>
       </div>

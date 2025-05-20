@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
 
 export async function middleware(request) {
+    //const accessToken = sessionStorage.getItem('accessToken')
+
     // const accessToken = request.cookies.get('accessToken')
     // const is_staff = request.cookies.get('is_staff')
-    // //console.log('is_staff: ', is_staff.value)
+    //console.log('is_staff: ', is_staff.value)
     // console.log('accessToken: ', accessToken)
-    // const refreshToken = request.cookies.get('refreshToken')
+    // // const refreshToken = request.cookies.get('refreshToken')
     // const { pathname } = request.nextUrl
     // // if (pathname.startsWith('/admin') && accessToken && refreshToken&& is_staff) {
     // //     return NextResponse.redirect(new URL('/', request.url))
@@ -28,7 +30,7 @@ export async function middleware(request) {
     // }
 
 
-    return NextResponse.next()
+    // return NextResponse.next()
 }
 
 export const config = {

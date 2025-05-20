@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import MyDrop from "./drop_down";
 import styles from "./nav_bar.module.css";
 
@@ -7,7 +7,7 @@ const NavBar = () => {
   const [isLogin, setIsLogin] = useState(false);
   const [user, setUser] = useState("");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const checkLoginStatus = async () => {
       if (typeof window !== "undefined") {
         const username = sessionStorage.getItem("username");
